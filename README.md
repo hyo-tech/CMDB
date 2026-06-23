@@ -94,7 +94,7 @@
 
 ## 获取与使用
 
-请参考本仓库的 [Releases](链接) 页面下载最新版本，或通过 Docker Compose 一键部署（详见 [部署指南](链接) ）。
+请参考本仓库的 [Releases](链接) 页面下载最新版本，或通过 Docker Compose 一键部署（详见 [部署指南](https://www.huayung.cn/docs/1.x/installation/installation-demo) ）。
 
 ---
 
