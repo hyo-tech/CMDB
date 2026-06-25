@@ -1,3 +1,5 @@
+[中文](#中文) | [English](#english) 
+## 中文
 # 华杨 CMDB · 社区版
 
 **🆓 企业级配置管理数据库，社区版永久免费！**
@@ -72,3 +74,80 @@ docker compose up -d
 ## ⚖️ 许可说明
 
 本社区版软件的使用受 [LICENSE](https://github.com/hyo-tech/CMDB?tab=License-1-ov-file) 文件中的条款约束。
+
+---
+## English
+# Huayung CMDB · Community Edition
+
+**🆓 Enterprise-grade configuration management database — Community Edition is permanently free!**
+
+Huayung CMDB is the core module of the Huayung Smart Operations Platform. It can be deployed independently to centrally manage IT assets, applications, and their dependencies, helping teams gain precise visibility into their infrastructure and improve operational efficiency.
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
+- Docker 20.10+
+- Docker Compose 2.0+
+
+### One-Click Deployment
+```bash
+# Clone the repository
+git clone https://github.com/your-org/your-cmdb-repo.git
+cd your-cmdb-repo
+
+# Start the service
+docker compose up -d
+```
+
+Once the service is running, access it at `https://<host_FQDN>:4443/ui/100000001` to get started.
+
+> For detailed configuration, refer to the [Community Edition Deployment Guide](https://www.huayung.cn/docs/en/1.x/installation/installation-demo).
+
+---
+
+## 🧐 What Makes Huayung CMDB Different?
+
+### 🧬 Configuration Item Type Model Inheritance
+Supports multi-level inheritance for configuration item types. Subtypes automatically inherit all attributes and relationship definitions from their parent types, significantly reducing repetitive configuration work and ensuring consistency and maintainability across your model definitions.
+
+### 🎨 Visual Canvas for Building Relationships
+Intuitively define dependencies, connections, and containment relationships between configuration item types using a drag-and-drop canvas. Preview relationship topologies in real time — building complex models becomes as easy as drawing a flowchart.
+
+### 🕸️ Topology Query Language (TQL)
+A flexible query language purpose-built for CMDB scenarios. Supports complex topological searches across types and relationships. A single query returns complete information about configuration items and their associated paths, addressing a wide range of operational analysis needs.
+
+---
+
+## 🧩 Key Features
+
+| Module | Description |
+|---|---|
+| **Dashboard** | Visualizes key configuration item metrics with support for custom panels |
+| **Configuration Item Catalog** | Browse configuration item data by model type hierarchy, view topological structures, and track change history |
+| **Configuration Item Lists** | Create custom list views to flexibly organize data according to your needs |
+| **Configuration Item Types** | Model management based on an inheritance architecture — freely extend custom types, define custom attributes, identification rules, and relationships |
+| **Configuration Item Relationship Types** | Define relationships and constraints between types with visual canvas configuration support |
+| **Query Workbench** | Visually build TQL queries for complex topological searches across multiple use cases |
+| **Option Lists** | Provide predefined values for attributes |
+
+For complete product documentation, refer to the [Huayung Smart Operations Platform Documentation](https://www.huayung.cn/docs/en/1.x/intro).
+
+---
+
+## 🔖 Edition Comparison
+
+| Feature | Community Edition | Enterprise Edition |
+|---|---|---|
+| All CMDB Core Features | ✅ | ✅ |
+| High Availability & Cluster Deployment | ❌ | ✅ |
+| Enterprise-Grade Technical Support | ❌ | ✅ |
+
+[Contact us to learn more]((https://www.huayung.cn/en/index.html#form5-1m)).
+
+---
+
+## ⚖️ License
+
+Use of this Community Edition software is subject to the terms and conditions in the [LICENSE](https://github.com/hyo-tech/CMDB?tab=License-1-ov-file) file.
