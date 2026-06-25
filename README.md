@@ -1,5 +1,5 @@
-[中文](#中文) | [English](#english) 
-## 中文
+[中文](#华杨-CMDB--社区版) | [English](#huayang-cmdb--community-edition) 
+
 # 华杨 CMDB · 社区版
 
 **🆓 企业级配置管理数据库，社区版永久免费！**
@@ -76,7 +76,7 @@ docker compose up -d
 本社区版软件的使用受 [LICENSE](https://github.com/hyo-tech/CMDB?tab=License-1-ov-file) 文件中的条款约束。
 
 ---
-## English
+
 # Huayung CMDB · Community Edition
 
 **🆓 Enterprise-grade configuration management database — Community Edition is permanently free!**
