@@ -1,4 +1,4 @@
-[中文](#华杨-CMDB--社区版) | [English](#huayang-cmdb--community-edition) 
+[中文](#华杨-CMDB--社区版) | [English](#huayung-cmdb--community-edition) 
 
 # 华杨 CMDB · 社区版
 
