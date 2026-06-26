@@ -105,7 +105,7 @@ Once the service is running, access it at `https://<host_FQDN>:4443/ui/100000001
 
 ---
 
-## 🧐 Why Huayang CMDB?
+## 🧐 Why Huayung CMDB?
 
 ### 🤖 AI-Native
 Built-in multiple agents that integrate with large language models. Users can interact with the platform and analyze data using natural language, significantly lowering the learning curve and accelerating time-to-value.
