@@ -30,44 +30,40 @@ docker compose up -d
 
 ---
 
-## 🧐 华杨CMDB有什么不一样？
+## 🧐 为什么选择华杨CMDB？
 
-### 🧬 配置项类型模型继承
-支持配置项类型的多级继承，子类型自动继承父类型的全部属性与关系定义，大幅减少重复配置工作，确保模型定义的一致性与可维护性。
+### 🤖 AI原生
+内置多个智能体对接大语言模型，用户可用自然语言使用产品能力并分析数据，大幅降低使用门槛，加速价值实现。
 
-### 🎨 可视化画布构建关联关系
-通过拖拽式画布直观定义配置项类型之间的依赖、连接与包含关系，实时预览关系拓扑，让复杂模型的构建像画流程图一样简单。
+### 🧬 基于继承的配置项模型
+预置200余种开箱即用类型，支持多级继承，子类型自动继承父类型全部属性与关系。存储开销最高降低40%，查询性能显著提升。
+
+### 🎨 可视化画布构建拓扑
+通过拖拽式画布直观定义依赖、连接与包含关系，实时预览拓扑。构建时间减少60%-70%，在影响生产前即可发现逻辑问题。
 
 ### 🕸️ 拓扑查询语言（TQL）
-专为CMDB场景设计的灵活查询语言，支持跨类型、跨关系的复杂拓扑检索，一次查询即可获得配置项及其关联路径的完整信息，满足各类运维分析场景。
+自研图数据查询语言，支持跨类型、跨关系的复杂拓扑检索。语法直观易用，基于自研图算法，深度增加时性能依然稳定。
 
----
+### 🔎 自动发现引擎
+基于IP段灵活配置，隔离网段可通过代理自动发现。持续扫描物理、虚拟、云及应用环境，构建实时感知的智能资源图谱。
 
-## 🧩 主要功能
+### 🫆 智能识别引擎
+通过可配置匹配逻辑实现唯一性识别，支持多源数据归一化与智能仲裁，自动合并去重，确保CMDB始终为唯一可信基准。
 
-| 模块 | 能力说明 |
-|---|---|
-| **仪表盘** | 可视化展示关键配置项指标，支持自定义面板 |
-| **配置项目录** | 按模型类型层次浏览配置项数据，查看拓扑结构、跟踪变更历史 |
-| **配置项列表** | 自定义列表视图，灵活按需求组织数据 |
-| **配置项类型** | 基于继承架构的模型管理，自由扩展自定义类型，自定义属性、识别规则和关联关系 |
-| **配置项关系类型** | 定义类型间的关系与约束，支持可视化画布配置 |
-| **查询工作室** | 可视化构建TQL查询用于复杂拓扑检索，支持多种应用场景 |
-| **选项列表** | 为属性提供预定义值 |
-
-完整产品文档，请参考[华杨智能运维平台文档](https://www.huayung.cn/docs/1.x/intro)。
+下载详细[产品介绍](https://www.huayung.cn/assets/files/%E5%8D%8E%E6%9D%A8CMDB%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D.pdf)。
 
 ---
 
 ## 🔖 版本对比
 
-| 功能 | 社区版 | 商业版 |
+| 功能 | 社区版 | 企业版 |
 |---|---|---|
 | 所有CMDB核心功能 | ✅ | ✅ |
 | 高可用与集群部署 | ❌ | ✅ |
+| 多租户 | ❌ | ✅ |
 | 企业级技术支持 | ❌ | ✅ |
 
-[联系我们了解更多](https://www.huayung.cn/index.html#form5-1m)。
+[联系我们](https://www.huayung.cn/index.html#form5-1m)了解如何购买企业版。
 
 ---
 
@@ -107,32 +103,27 @@ Once the service is running, access it at `https://<host_FQDN>:4443/ui/100000001
 
 ---
 
-## 🧐 What Makes Huayung CMDB Different?
+## 🧐 Why Huayang CMDB?
 
-### 🧬 Configuration Item Type Model Inheritance
-Supports multi-level inheritance for configuration item types. Subtypes automatically inherit all attributes and relationship definitions from their parent types, significantly reducing repetitive configuration work and ensuring consistency and maintainability across your model definitions.
+### 🤖 AI-Native
+Built-in multiple agents that integrate with large language models. Users can interact with the platform and analyze data using natural language, significantly lowering the learning curve and accelerating time-to-value.
 
-### 🎨 Visual Canvas for Building Relationships
-Intuitively define dependencies, connections, and containment relationships between configuration item types using a drag-and-drop canvas. Preview relationship topologies in real time — building complex models becomes as easy as drawing a flowchart.
+### 🧬 Inheritance-Based Configuration Item Model
+Comes with 200+ pre-built configuration item types out of the box. Supports multi-level inheritance — subtypes automatically inherit all attributes and relationships from parent types. Reduces storage overhead by up to 40% with significantly improved query performance.
+
+### 🎨 Visual Canvas for Building Topologies
+Intuitively define dependencies, connections, and containment relationships using a drag-and-drop canvas with real-time topology preview. Reduces topology construction time by 60–70%, and helps catch logical issues before they impact production.
 
 ### 🕸️ Topology Query Language (TQL)
-A flexible query language purpose-built for CMDB scenarios. Supports complex topological searches across types and relationships. A single query returns complete information about configuration items and their associated paths, addressing a wide range of operational analysis needs.
+A self-developed graph query language designed for CMDB scenarios. Supports complex topological searches across types and relationships. The syntax is intuitive and easy to use; based on our proprietary graph algorithms, performance remains stable even as relationship depth increases.
 
----
+### 🔎 Auto-Discovery Engine
+Flexibly configurable by IP ranges; isolated network segments can be discovered via proxy agents. Continuously scans physical, virtual, cloud, and application environments to build a real-time resource map — not just a static asset inventory.
 
-## 🧩 Key Features
+### 🫆 Intelligent Identification Engine
+Ensures unique identification of configuration items through configurable matching and verfication rules. Supports data normalization and arbitration from multiple sources, with automatic deduplication and merging — keeping your CMDB as the single source of truth.
 
-| Module | Description |
-|---|---|
-| **Dashboard** | Visualizes key configuration item metrics with support for custom panels |
-| **Configuration Item Catalog** | Browse configuration item data by model type hierarchy, view topological structures, and track change history |
-| **Configuration Item Lists** | Create custom list views to flexibly organize data according to your needs |
-| **Configuration Item Types** | Model management based on an inheritance architecture — freely extend custom types, define custom attributes, identification rules, and relationships |
-| **Configuration Item Relationship Types** | Define relationships and constraints between types with visual canvas configuration support |
-| **Query Workbench** | Visually build TQL queries for complex topological searches across multiple use cases |
-| **Option Lists** | Provide predefined values for attributes |
-
-For complete product documentation, refer to the [Huayung Smart Operations Platform Documentation](https://www.huayung.cn/docs/en/1.x/intro).
+Download the full [Product Brochure](https://www.huayung.cn/en/assets/files/Huayung_CMDB_Intro.pdf).
 
 ---
 
@@ -142,9 +133,10 @@ For complete product documentation, refer to the [Huayung Smart Operations Platf
 |---|---|---|
 | All CMDB Core Features | ✅ | ✅ |
 | High Availability & Cluster Deployment | ❌ | ✅ |
+| Multi-Tenancy | ❌ | ✅ |
 | Enterprise-Grade Technical Support | ❌ | ✅ |
 
-[Contact us to learn more]((https://www.huayung.cn/en/index.html#form5-1m)).
+[Contact us](https://www.huayung.cn/en/index.html#form5-1m) to learn more about purchasing the Enterprise Edition.
 
 ---
 
