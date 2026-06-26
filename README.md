@@ -1,4 +1,4 @@
-<img width="148" height="70" alt="image" src="https://github.com/user-attachments/assets/fe89d53e-62b4-4212-93ed-cd92ebe2facc" />[中文](#华杨-CMDB--社区版) | [English](#huayung-cmdb--community-edition) 
+[中文](#华杨-CMDB--社区版) | [English](#huayung-cmdb--community-edition) 
 
 # 华杨 CMDB · 社区版
 
