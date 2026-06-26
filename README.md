@@ -1,4 +1,4 @@
-[中文](#华杨-CMDB--社区版) | [English](#huayung-cmdb--community-edition) 
+<img width="148" height="70" alt="image" src="https://github.com/user-attachments/assets/fe89d53e-62b4-4212-93ed-cd92ebe2facc" />[中文](#华杨-CMDB--社区版) | [English](#huayung-cmdb--community-edition) 
 
 # 华杨 CMDB · 社区版
 
@@ -37,13 +37,13 @@ sudo ./scripts/install.sh <host_FQDN>
 内置多个智能体对接大语言模型，用户可用自然语言使用产品能力并分析数据，大幅降低使用门槛，加速价值实现。
 
 ### 🧬 基于继承的配置项模型
-预置200余种开箱即用类型，支持多级继承，子类型自动继承父类型全部属性与关系。存储开销最高降低40%，查询性能显著提升。
+预置**200**余种开箱即用类型，支持多级继承，子类型自动继承父类型全部属性与关系。存储开销最高降低**40%**，查询性能显著提升。
 
 ### 🎨 可视化画布构建拓扑
-通过拖拽式画布直观定义依赖、连接与包含关系，实时预览拓扑。构建时间减少60%-70%，在影响生产前即可发现逻辑问题。
+通过拖拽式画布直观定义依赖、连接与包含关系，实时预览拓扑。构建时间减少**60%-70%**，在影响生产前即可发现逻辑问题。
 
 ### 🕸️ 拓扑查询语言（TQL）
-自研图数据查询语言，支持跨类型、跨关系的复杂拓扑检索。语法直观易用，基于自研图算法，深度增加时性能依然稳定。
+自研图数据查询语言，支持跨类型、跨关系的复杂拓扑检索。语法直观易用，基于自研图算法，**10亿级**CI数据查询依然秒级响应。
 
 ### 🔎 自动发现引擎
 基于IP段灵活配置，隔离网段可通过代理自动发现。持续扫描物理、虚拟、云及应用环境，构建实时感知的智能资源图谱。
@@ -117,7 +117,7 @@ Comes with 200+ pre-built configuration item types out of the box. Supports mult
 Intuitively define dependencies, connections, and containment relationships using a drag-and-drop canvas with real-time topology preview. Reduces topology construction time by 60–70%, and helps catch logical issues before they impact production.
 
 ### 🕸️ Topology Query Language (TQL)
-A self-developed graph query language designed for CMDB scenarios. Supports complex topological searches across types and relationships. The syntax is intuitive and easy to use; based on our proprietary graph algorithms, performance remains stable even as relationship depth increases.
+A self-developed graph query language that supports complex topological searches across types and relationships. The syntax is intuitive and easy to use; built on our proprietary graph algorithms, it delivers sub-second response times even at the **billion-CI** scale.
 
 ### 🔎 Auto-Discovery Engine
 Flexibly configurable by IP ranges; isolated network segments can be discovered via proxy agents. Continuously scans physical, virtual, cloud, and application environments to build a real-time resource map — not just a static asset inventory.
