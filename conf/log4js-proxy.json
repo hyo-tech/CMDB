@@ -1,0 +1,31 @@
+{
+  "appenders": {
+    "file": {
+      "type": "file",
+      "filename": "logs/proxy.log",
+      "maxLogSize": 10485760,
+      "backups": 3,
+      "compress": false
+    },
+    "script-engine": {
+      "type": "file",
+      "filename": "logs/script-engine.log",
+      "maxLogSize": 10485760,
+      "backups": 3,
+      "compress": false
+    },
+    "out": {
+      "type": "stdout"
+    }
+  },
+  "categories": {
+    "script-engine": {
+      "appenders": ["script-engine", "out"],
+      "level": "info"
+    },
+    "default": {
+      "appenders": ["file", "out"],
+      "level": "info"
+    }
+  }
+}

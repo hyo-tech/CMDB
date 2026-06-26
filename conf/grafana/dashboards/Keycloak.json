@@ -1,0 +1,114 @@
+{
+  "title": "Keycloak Metrics",
+  "description": "Keycloak performance and usage dashboard",
+  "tags": ["keycloak", "auth", "metrics"],
+  "style": "dark",
+  "timezone": "browser",
+  "editable": true,
+  "panels": [
+    {
+      "title": "Authentication Requests",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(keycloak_logins{realm=\"$realm\"}[1m])) by (client_id, realm)",
+          "legendFormat": "{{client_id}} - {{realm}}"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8}
+    },
+    {
+      "title": "Error Rates",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(keycloak_failed_login_attempts{realm=\"$realm\"}[1m])) by (client_id, realm)",
+          "legendFormat": "{{client_id}} - {{realm}}"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8}
+    },
+    {
+      "title": "Token Metrics",
+      "type": "row",
+      "gridPos": {"x": 0, "y": 8, "w": 24, "h": 1}
+    },
+    {
+      "title": "Token Issues",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(keycloak_token_exchanges{realm=\"$realm\"}[1m])) by (client_id)",
+          "legendFormat": "{{client_id}} - Exchanges"
+        },
+        {
+          "expr": "sum(rate(keycloak_token_refreshes{realm=\"$realm\"}[1m])) by (client_id)",
+          "legendFormat": "{{client_id}} - Refreshes"
+        },
+        {
+          "expr": "sum(rate(keycloak_token_errors{realm=\"$realm\"}[1m])) by (client_id,error)",
+          "legendFormat": "{{client_id}} - {{error}}"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 9, "w": 12, "h": 8}
+    },
+    {
+      "title": "Session Counts",
+      "type": "stat",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(keycloak_sessions{realm=\"$realm\"}) by (client_id)",
+          "legendFormat": "{{client_id}}"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 9, "w": 12, "h": 8}
+    },
+    {
+      "title": "JVM Metrics",
+      "type": "row",
+      "gridPos": {"x": 0, "y": 17, "w": 24, "h": 1}
+    },
+    {
+      "title": "Memory Usage",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "keycloak_jvm_memory_used_bytes{area=\"heap\"}"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 18, "w": 12, "h": 8}
+    },
+    {
+      "title": "Thread Count",
+      "type": "graph",
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "keycloak_jvm_threads_current"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 18, "w": 12, "h": 8}
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "name": "realm",
+        "label": "Realm",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(keycloak_logins, realm)",
+        "refresh": 2
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  }
+}

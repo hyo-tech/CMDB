@@ -1,0 +1,924 @@
+/*
+ * Ant Design Style Login Page for Keycloak 26
+ * Overrides PatternFly styles with Ant Design 5.12.0 styling
+ */
+
+/* CSS Variables for Ant Design colors */
+:root {
+  --kc-antd-primary: #1677ff;
+  --kc-antd-primary-hover: #4096ff;
+  --kc-antd-primary-active: #0958d9;
+  --kc-antd-success: #52c41a;
+  --kc-antd-warning: #faad14;
+  --kc-antd-error: #ff4d4f;
+  --kc-antd-text-primary: rgba(0, 0, 0, 0.88);
+  --kc-antd-text-secondary: rgba(0, 0, 0, 0.65);
+  --kc-antd-border: #d9d9d9;
+  --kc-antd-bg-gray: #fafafa;
+  --kc-antd-radius: 6px;
+  --kc-antd-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03),
+                    0 1px 6px -1px rgba(0, 0, 0, 0.02),
+                    0 2px 4px 0 rgba(0, 0, 0, 0.02);
+  --kc-antd-shadow-lg: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
+                       0 3px 6px -4px rgba(0, 0, 0, 0.12),
+                       0 9px 28px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================
+   OVERRIDE PATTERNFLY WITH ANT DESIGN STYLES
+   ============================================ */
+
+/* Body and Background */
+body#keycloak-bg,
+.login-pf-page,
+body {
+  background: #ffffff !important;
+  margin: 0;
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif !important;
+}
+
+/* ============================================
+   CUSTOM TEMPLATE STYLES (kc-* classes)
+   ============================================ */
+
+/* Main Container - Two Column Layout */
+#kc-container,
+body #kc-container,
+html body #kc-container {
+  display: flex !important;
+  flex-direction: row !important;
+  min-height: 100vh;
+  width: 100%;
+  background: #ffffff;
+}
+
+/* Left Panel - Branding */
+.kc-left-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 50%;
+  min-height: 100vh;  
+  background: #f4f1f8;
+  box-sizing: border-box;
+}
+
+input[type="password"]::-ms-reveal {
+  display: none;
+}
+
+.kc-left-top {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20vh;
+}
+
+.kc-left-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  flex: 1;  
+}
+
+.kc-left-bottom img {
+  max-width: 100%;  
+  width: 50vw;
+  height: 100vh;
+}
+
+.kc-logo {
+  margin-bottom: 16px;
+}
+
+.kc-logo img {
+  height: 20vh;
+  width: auto;
+  display: block;
+}
+
+.kc-product-name {
+  font-size: 24px;
+  font-weight: 600;  
+  margin: 0;
+  text-align: center;
+}
+
+/* Right Panel - Login Form */
+.kc-right-panel {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  min-height: 100vh;  
+  padding: 10px;
+  background: #f1f0f5;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Language Selector - Top Right */
+.kc-language-selector-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 40px;
+}
+
+/* Content Area - Middle */
+#kc-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#kc-content-wrapper {
+  width: 100%;
+  max-width: 360px;
+}
+
+/* Copyright - Bottom */
+#kc-copyright {
+  text-align: center;
+  padding-top: 24px;
+  margin-top: auto;
+}
+
+.kc-copyright-text {
+  font-size: 16px;  
+}
+
+/* RTL support for two-column layout */
+.rtl #kc-container {
+  flex-direction: row-reverse !important;
+}
+
+.rtl .kc-language-selector-container {
+  justify-content: flex-start;
+}
+
+/* Language Selector Container */
+.kc-language-selector-container {
+  display: flex;
+  justify-content: end;  
+}
+
+/* Language Select Dropdown */
+.kc-language-select {
+  width: 100%;
+  max-width: 300px;
+  height: 32px;
+  padding: 4px 11px;
+  font-size: 14px;
+  line-height: 1.5715;
+  color: var(--kc-antd-text-primary);
+  background-color: #ffffff;
+  border: 1px solid var(--kc-antd-border);
+  border-radius: var(--kc-antd-radius);
+  transition: all 0.2s;
+  outline: none;
+  cursor: pointer;
+}
+
+.kc-language-select:hover {
+  border-color: var(--kc-antd-primary-hover);
+}
+
+.kc-language-select:focus {
+  border-color: var(--kc-antd-primary);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+/* RTL support for language selector */
+.rtl .kc-language-selector-container {
+  direction: ltr;
+}
+
+/* Login Container */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+  background: #f0f2f5;
+}
+
+/* Login Header */
+.login-header {
+  width: 100%;
+  max-width: 400px;
+  margin-bottom: 16px;
+}
+
+.login-header-wrapper h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--kc-antd-text-primary);
+  text-align: center;
+  margin: 0;
+}
+
+/* Main Card */
+#kc-container-wrapper {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: var(--kc-antd-radius);
+  box-shadow: var(--kc-antd-shadow-lg);
+}
+
+#kc-header-wrapper {
+  background: #ffffff;  
+}
+
+#kc-page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--kc-antd-text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+/* Form */
+/* form.kc-form {
+  padding: 24px;
+} */
+
+/* Form Groups */
+.kc-form-group {
+  margin-bottom: 20px;
+}
+
+/* Labels */
+.kc-label {
+  display: block;
+  font-size: 14px;
+  color: var(--kc-antd-text-primary);
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+.kc-label-login-title {
+  font-size: 20px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.kc-label-required::after {
+  content: ' *';
+  color: var(--kc-antd-error);
+}
+
+/* Custom kc-* Input styles */
+.kc-input {
+  width: 100%;
+  height: 32px;
+  padding: 4px 11px;
+  font-size: 14px;
+  line-height: 1.5715;
+  color: var(--kc-antd-text-primary);
+  background-color: #ffffff;
+  border: 1px solid var(--kc-antd-border);
+  border-radius: var(--kc-antd-radius);
+  transition: all 0.2s;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.kc-input:hover {
+  border-color: var(--kc-antd-primary-hover);
+}
+
+.kc-input:focus {
+  border-color: var(--kc-antd-primary);
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+/* Checkbox */
+.kc-checkbox-group {
+  display: flex;
+  align-items: center;
+}
+
+.kc-checkbox {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--kc-antd-text-primary);
+  margin: 0;
+}
+
+.kc-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0 8px 0 0;
+  border: 1px solid var(--kc-antd-border);
+  border-radius: 2px;
+  cursor: pointer;
+  appearance: none;
+  background-color: #ffffff;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.kc-checkbox input[type="checkbox"]:checked {
+  background-color: var(--kc-antd-primary);
+  border-color: var(--kc-antd-primary);
+}
+
+.kc-checkbox input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Form Options */
+.kc-form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Alert messages in custom template */
+.alert {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border-radius: var(--kc-antd-radius);
+}
+
+.alert-error {
+  background-color: #fff2f0;
+  border: 1px solid #ffccc7;
+  color: var(--kc-antd-error);
+}
+
+/* Links */
+.kc-link {
+  color: var(--kc-antd-primary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.kc-link:hover {
+  color: var(--kc-antd-primary-hover);
+  text-decoration: underline;
+}
+
+/* Buttons */
+.kc-button {
+  height: 32px;
+  padding: 4px 15px;
+  margin-right: 10px;
+  font-size: 14px;
+  font-weight: 400;
+  border-radius: var(--kc-antd-radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  text-align: center;
+  display: inline-block;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+
+.kc-button-primary {
+  color: #ffffff;
+  background-color: var(--kc-antd-primary);
+  border-color: var(--kc-antd-primary);  
+}
+
+.kc-button-primary:hover {
+  background-color: var(--kc-antd-primary-hover);
+  border-color: var(--kc-antd-primary-hover);
+}
+
+.kc-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Form buttons */
+.kc-form-buttons {
+  margin-top: 24px;
+}
+
+/* Social providers */
+#kc-social-providers {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--kc-antd-border);
+}
+
+.kc-divider {
+  font-size: 14px;
+  color: var(--kc-antd-text-secondary);
+  text-align: center;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.kc-divider::before,
+.kc-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 80px);
+  height: 1px;
+  background-color: var(--kc-antd-border);
+}
+
+.kc-divider::before {
+  left: 0;
+}
+
+.kc-divider::after {
+  right: 0;
+}
+
+.kc-social-providers-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kc-social-link {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  font-size: 14px;
+  color: var(--kc-antd-text-primary);
+  background-color: #ffffff;
+  border: 1px solid var(--kc-antd-border);
+  border-radius: var(--kc-antd-radius);
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.kc-social-link:hover {
+  color: var(--kc-antd-primary);
+  border-color: var(--kc-antd-primary);
+}
+
+/* Registration */
+#kc-registration-container {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--kc-antd-border);
+  text-align: center;
+}
+
+.kc-registration-text {
+  font-size: 14px;
+  color: var(--kc-antd-text-secondary);
+}
+
+/* Info */
+#kc-info-wrapper {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: var(--kc-antd-bg-gray);
+  border-radius: var(--kc-antd-radius);
+}
+
+#kc-info {
+  font-size: 14px;
+  color: var(--kc-antd-text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
+/* Reset PatternFly page layout */
+.login-pf-page {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+  padding: 24px !important;
+}
+
+/* Header - Show our custom header */
+#kc-header {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide PatternFly page header */
+.login-pf-page-header {
+  display: none !important;
+}
+
+/* Main Card Container - Ant Design Card style */
+.card-pf {
+  background: #ffffff !important;
+  border-radius: var(--kc-antd-radius) !important;
+  box-shadow: var(--kc-antd-shadow-lg) !important;
+  border: none !important;
+  padding: 0 !important;
+  max-width: 360px !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+}
+
+/* Card Header - PatternFly v4 */
+.login-pf-header {
+  padding: 32px 24px 16px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+#kc-page-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: var(--kc-antd-text-primary) !important;
+  margin: 0 !important;
+  text-align: center !important;
+}
+
+/* Card Content */
+#kc-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;  
+}
+
+#kc-content-wrapper {
+  background: white;
+  max-width: 400px;
+  padding: 30px;
+  width: 100%;
+}
+
+/* ============================================
+   FORM STYLES - ANT DESIGN INPUT
+   ============================================ */
+
+/* Form Container */
+#kc-form,
+form {
+  margin: 0 !important;
+}
+
+/* Form Groups - PatternFly v4 */
+.login-pf-page .form-group {
+  margin-bottom: 20px !important;
+}
+
+/* Labels (PatternFly v4) - Higher specificity */
+.login-pf-page .pf-c-form__label,
+.login-pf-page label {
+  display: block !important;
+  font-size: 14px !important;
+  color: var(--kc-antd-text-primary) !important;
+  margin-bottom: 8px !important;
+  font-weight: 400 !important;
+}
+
+/* Text Inputs - Ant Design Input style (PatternFly v4) - Higher specificity */
+.login-pf-page input[type="text"],
+.login-pf-page input[type="password"],
+.login-pf-page input[type="email"],
+.login-pf-page .pf-c-form-control,
+.login-pf-page .pf-c-input-group .pf-c-form-control {
+  width: 100% !important;
+  height: 32px !important;
+  padding: 4px 11px !important;
+  font-size: 14px !important;
+  line-height: 1.5715 !important;
+  color: var(--kc-antd-text-primary) !important;
+  background-color: #ffffff !important;
+  border: 1px solid var(--kc-antd-border) !important;
+  border-radius: var(--kc-antd-radius) !important;
+  transition: all 0.2s !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+}
+
+/* More specific selector for input groups */
+.login-pf-page .pf-c-input-group {
+  width: 100% !important;
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+input[type="email"]:hover,
+.pf-v5-c-form-control:hover,
+input[id="username"]:hover,
+input[id="password"]:hover {
+  border-color: var(--kc-antd-primary-hover) !important;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+.pf-v5-c-form-control:focus,
+input[id="username"]:focus,
+input[id="password"]:focus {
+  border-color: var(--kc-antd-primary) !important;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1) !important;
+  outline: none !important;
+}
+
+input::placeholder {
+  color: rgba(0, 0, 0, 0.25) !important;
+}
+
+input:disabled {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+  cursor: not-allowed !important;
+}
+
+/* ============================================
+   BUTTONS - ANT DESIGN BUTTON
+   ============================================ */
+
+/* Primary Button (PatternFly v4) - Higher specificity */
+.login-pf-page input[type="submit"],
+.login-pf-page .pf-c-button.pf-m-primary,
+.login-pf-page .pf-c-button.pf-m-primary.pf-m-block,
+.login-pf-page #kc-login {
+  height: 32px !important;
+  padding: 4px 15px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.5715 !important;
+  color: #ffffff !important;
+  background-color: var(--kc-antd-primary) !important;
+  border: 1px solid var(--kc-antd-primary) !important;
+  border-radius: var(--kc-antd-radius) !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  outline: none !important;
+  width: 100% !important;
+  text-align: center !important;
+  box-shadow: none !important;
+}
+
+/* Button hover - PatternFly v4 */
+.login-pf-page .pf-c-button.pf-m-primary:hover,
+.login-pf-page input[type="submit"]:hover,
+.login-pf-page #kc-login:hover {
+  background-color: var(--kc-antd-primary-hover) !important;
+  border-color: var(--kc-antd-primary-hover) !important;
+}
+
+button[type="submit"]:hover,
+input[type="submit"]:hover,
+.pf-v5-c-button.pf-m-primary:hover,
+.pf-v5-c-button.pf-v5-m-primary:hover,
+button[id="kc-login"]:hover {
+  background-color: var(--kc-antd-primary-hover) !important;
+  border-color: var(--kc-antd-primary-hover) !important;
+}
+
+button[type="submit"]:active,
+input[type="submit"]:active,
+.pf-v5-c-button.pf-m-primary:active,
+button[id="kc-login"]:active {
+  background-color: var(--kc-antd-primary-active) !important;
+  border-color: var(--kc-antd-primary-active) !important;
+}
+
+button:disabled,
+button[type="submit"]:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6 !important;
+}
+
+/* Form submit button group - ensure full width */
+#kc-form-buttons,
+.pf-v5-c-form__actions {
+  margin-top: 24px !important;
+  width: 100% !important;
+}
+
+/* ============================================
+   CHECKBOX - ANT DESIGN CHECKBOX
+   ============================================ */
+
+.pf-v5-c-check,
+input[type="checkbox"] {
+  width: 16px !important;
+  height: 16px !important;
+  border: 1px solid var(--kc-antd-border) !important;
+  border-radius: 2px !important;
+  cursor: pointer !important;
+}
+
+/* ============================================
+   ALERTS AND ERROR MESSAGES
+   ============================================ */
+
+#kc-error-message,
+.alert,
+.alert-danger,
+.pf-v5-c-alert {
+  background-color: #fff2f0 !important;
+  border: 1px solid #ffccc7 !important;
+  border-radius: var(--kc-antd-radius) !important;
+  padding: 12px 16px !important;
+  margin-bottom: 16px !important;
+}
+
+#kc-error-message p,
+.alert p,
+.pf-v5-c-alert__title {
+  color: var(--kc-antd-error) !important;
+  font-size: 14px !important;
+  margin: 0 !important;
+}
+
+.instruction,
+.pf-v5-c-alert__description {
+  color: var(--kc-antd-error) !important;
+  font-size: 14px !important;
+}
+
+/* ============================================
+   LINKS
+   ============================================ */
+
+a,
+.kc-link,
+.pf-v5-c-button.pf-m-link {
+  color: var(--kc-antd-primary) !important;
+  text-decoration: none !important;
+  transition: color 0.2s !important;
+}
+
+a:hover,
+.kc-link:hover,
+.pf-v5-c-button.pf-m-link:hover {
+  color: var(--kc-antd-primary-hover) !important;
+  text-decoration: underline !important;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 480px) {
+  .login-pf-page {
+    padding: 16px !important;
+  }
+
+  .card-pf,
+  .pf-v5-c-login__main {
+    max-width: 100% !important;
+  }
+
+  .login-pf-header,
+  .pf-v5-c-login__main-header {
+    padding: 20px 16px 12px !important;
+  }
+
+  #kc-page-title,
+  .pf-v5-c-title {
+    font-size: 18px !important;
+  }
+
+  .pf-v5-c-login__main-body {
+    padding: 0 16px 20px !important;
+  }
+}
+
+/* ============================================
+   UTILITY OVERRIDES
+   ============================================ */
+
+/* Remove PatternFly specific styles */
+.pf-v5-c-login {
+  background: transparent !important;
+}
+
+.pf-v5-c-login__container {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* Remove borders and shadows from PatternFly */
+.pf-v5-c-card,
+.card-pf {
+  box-shadow: var(--kc-antd-shadow-lg) !important;
+}
+
+/* Input group overrides */
+.pf-v5-c-input-group,
+.pf-v5-c-text-input-group {
+  width: 100% !important;
+}
+
+.pf-v5-c-input-group .pf-v5-c-input-group__item,
+.pf-v5-c-text-input-group__main {
+  flex: 1 !important;
+}
+
+.pf-v5-c-text-input-group__text input {
+  border: none !important;
+  box-shadow: none !important;
+}
+/* ============================================
+   PASSWORD SHOW/HIDE TOGGLE (Ant Design style)
+   ============================================ */
+
+/* Password input wrapper - make it the positioning context */
+.kc-password-wrapper {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+/* Password input with padding for icon - ONLY within password wrapper */
+.kc-password-wrapper input[type="password"],
+.kc-password-wrapper .kc-input {
+  padding-right: 38px !important;
+}
+
+/* Password toggle button - positioned absolutely within wrapper */
+.kc-password-toggle {
+  position: absolute !important;
+  right: 1px !important;
+  top: 1px !important;
+  bottom: 1px !important;
+  width: 38px !important;
+  background: none !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: rgba(0, 0, 0, 0.45) !important;
+  transition: color 0.2s !important;
+  z-index: 10 !important;
+  outline: none !important;
+  border-radius: 0 var(--kc-antd-radius) var(--kc-antd-radius) 0 !important;
+}
+
+.kc-password-toggle:hover {
+  color: rgba(0, 0, 0, 0.88) !important;
+}
+
+.kc-password-toggle:focus-visible {
+  outline: 2px solid var(--kc-antd-primary) !important;
+  outline-offset: -2px !important;
+}
+
+/* SVG icons within toggle button */
+.kc-password-toggle svg {
+  display: block !important;
+  width: 16px !important;
+  height: 16px !important;
+  flex-shrink: 0 !important;
+  fill: none !important;
+  stroke: currentColor !important;
+  stroke-width: 1.5 !important;
+}
+
+/* Icon display logic for password toggle */
+/* Default state (password hidden): show eye-off icon */
+.kc-password-toggle .kc-eye-icon {
+  display: none !important;
+}
+
+/* Toggled state (password visible): show eye icon */
+.kc-password-toggle.toggled .kc-eye-icon {
+  display: block !important;
+}
+
+.kc-password-toggle.toggled .kc-eye-off-icon {
+  display: none !important;
+}
+
+/* RTL support */
+.rtl .kc-password-wrapper input[type="password"],
+.rtl .kc-password-wrapper .kc-input {
+  padding-right: 11px !important;
+  padding-left: 38px !important;
+}
+
+.rtl .kc-password-toggle {
+  right: auto !important;
+  left: 1px !important;
+  border-radius: var(--kc-antd-radius) 0 0 var(--kc-antd-radius) !important;
+}

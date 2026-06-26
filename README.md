@@ -11,20 +11,23 @@
 ## ⚡ 快速开始
 
 ### 前置要求
-- Docker 20.10+
-- Docker Compose 2.0+
+1. **Docker Engine**: 需安装 Docker CE 29.4.0 及以上版本，并内置 docker compose 插件 
+1. **端口占用**：确保 `4443` 端口未被其他服务占用
+2. **防火墙**：如需远程访问，请确保防火墙开放 `4443` 端口
+3. **资源要求**：建议至少 8核CPU 和 16GB 内存和 100GB 可用磁盘空间
+
 
 ### 一键部署
 ```bash
 # 克隆仓库
-git clone https://github.com/你的组织名/your-cmdb-repo.git
-cd your-cmdb-repo
+git clone https://github.com/hyo-tech/CMDB.git
+cd CMDB
 
 # 启动服务
-docker compose up -d
+./scripts/install.sh <host_FQDN>
 ```
 
-服务启动后，访问 `https://<host_FQDN>:4443/ui/100000001` 即可开始使用。
+服务启动后，访问 `https://<host_FQDN>:4443/ui/100000001` (默认用户名密码 admin/admin), 即可开始使用。
 
 > 详细配置说明请参考 [社区版部署指南](https://www.huayung.cn/docs/1.x/installation/installation-demo)。
 
@@ -84,17 +87,19 @@ Huayung CMDB is the core module of the Huayung Smart Operations Platform. It can
 ## ⚡ Quick Start
 
 ### Prerequisites
-- Docker 20.10+
-- Docker Compose 2.0+
+1. Docker Engine: Docker CE version 29.4.0 or higher is required, with the built-in Docker Compose plugin.
+2. Port Availability: Ensure that port 4443 is not occupied by other services.
+3. Firewall: If remote access is required, make sure port 4443 is open in the firewall.
+4. Resource Requirements: It is recommended to have at least an 8-core CPU, 16GB of RAM, and 100GB of available disk space.
 
 ### One-Click Deployment
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/your-cmdb-repo.git
-cd your-cmdb-repo
+git clone https://github.com/hyo-tech/CMDB.git
+cd CMDB
 
 # Start the service
-docker compose up -d
+./scripts/install.sh <host_FQDN>
 ```
 
 Once the service is running, access it at `https://<host_FQDN>:4443/ui/100000001` to get started.

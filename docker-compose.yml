@@ -1,0 +1,549 @@
+services:
+
+  cmdb:
+    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+    environment:
+      PORT: 8443
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
+      OTEL_SERVICE_NAME: cmdb
+      NODE_ENV: production
+      TRANSPORTER: nats://nats:4222
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      SETTING_GLOBAL_ENABLED_MODULES: cmdb
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      HOST: ${HOST}
+      WEBSECURE_PORT: ${WEBSECURE_PORT}      
+      SERVICEDIR: services
+      SERVICES: query-definition,class-model,tql-engine,datain,multi-tenant,export,dashboard-engine,settings-engine,search-engine
+
+    depends_on:
+        - postgres
+    labels:
+      - "traefik.enable=true"
+      # 1. Bearer Token 路由（优先级高）
+      - "traefik.http.routers.cmdb-bearer.rule=PathRegexp(`/cmdb`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
+      - "traefik.http.routers.cmdb-bearer.priority=20"
+      - "traefik.http.routers.cmdb-bearer.service=cmdb"
+      - "traefik.http.routers.cmdb-bearer.tls=true"
+      - "traefik.http.services.cmdb-bearer.loadbalancer.server.port=8443"
+      - "traefik.http.services.cmdb-bearer.loadbalancer.server.scheme=https"
+
+      # 2. 普通（无 Bearer）API 路由，走 oauth2-proxy
+      - "traefik.http.routers.cmdb.rule=PathRegexp(`/cmdb`)"
+      - "traefik.http.routers.cmdb.priority=10"
+      - "traefik.http.routers.cmdb.service=cmdb"
+      - "traefik.http.routers.cmdb.tls=true"
+      - "traefik.http.routers.cmdb.middlewares=oauth2-proxy"
+      - "traefik.http.services.cmdb.loadbalancer.server.port=8443"
+      - "traefik.http.services.cmdb.loadbalancer.server.scheme=https"
+    volumes:
+      - ./conf/certificates:/cmdb/conf/certificates:ro  
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  cmdb-api:
+    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+    environment:
+      PORT: 8443
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
+      OTEL_SERVICE_NAME: cmdb-api
+      NODE_ENV: production
+      TRANSPORTER: nats://nats:4222
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      HOST: ${HOST}
+      WEBSECURE_PORT: ${WEBSECURE_PORT}
+      SERVICEDIR: services
+      SERVICES: cmdb-api
+
+    depends_on:
+        - postgres
+        - cmdb
+    labels:
+      - "traefik.enable=true"
+      # 1. Bearer Token 路由（优先级高）
+      - "traefik.http.routers.cmdb-api-bearer.rule=PathRegexp(`^/api/[0-9]+/cmdb/.*`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
+      - "traefik.http.routers.cmdb-api-bearer.priority=25"
+      - "traefik.http.routers.cmdb-api-bearer.service=cmdb-api"
+      - "traefik.http.routers.cmdb-api-bearer.tls=true"
+      - "traefik.http.services.cmdb-api-bearer.loadbalancer.server.port=8443"
+      - "traefik.http.services.cmdb-api-bearer.loadbalancer.server.scheme=https"
+
+      # 2. 普通（无 Bearer）API 路由，走 oauth2-proxy
+      - "traefik.http.routers.cmdb-api.rule=PathRegexp(`^/api/[0-9]+/cmdb/.*`)"
+      - "traefik.http.routers.cmdb-api.priority=15"
+      - "traefik.http.routers.cmdb-api.service=cmdb-api"
+      - "traefik.http.routers.cmdb-api.tls=true"
+      - "traefik.http.routers.cmdb-api.middlewares=oauth2-proxy"
+      - "traefik.http.services.cmdb-api.loadbalancer.server.port=8443"
+      - "traefik.http.services.cmdb-api.loadbalancer.server.scheme=https"
+    volumes:
+      - ./conf/certificates:/cmdb/conf/certificates:ro     
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  platform-api:
+    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+    environment:
+      PORT: 8446
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
+      OTEL_SERVICE_NAME: platform-api
+      NODE_ENV: production
+      TRANSPORTER: nats://nats:4222
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      HOST: ${HOST}
+      WEBSECURE_PORT: ${WEBSECURE_PORT}
+      SERVICEDIR: services
+      SERVICES: platform-api
+      KEYCLOAK_URL: https://${HOST}:${WEBSECURE_PORT}/idm
+      KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      KEYCLOAK_SERVICE_ACCOUNT_CLIENT_ID: ${KEYCLOAK_SERVICE_ACCOUNT_CLIENT_ID}
+      KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET: ${KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET}
+    depends_on:
+        - postgres
+        - keycloak
+        - role-assigner
+    labels:
+      - "traefik.enable=true"
+      # 1. 公共认证端点（最高优先级，不走 oauth2-proxy）
+      - "traefik.http.routers.platform-api-auth.rule=PathRegexp(`^/api/[0-9]+/platform/authenticate`)"
+      - "traefik.http.routers.platform-api-auth.priority=30"
+      - "traefik.http.routers.platform-api-auth.service=platform-api"
+      - "traefik.http.routers.platform-api-auth.tls=true"
+      - "traefik.http.services.platform-api-auth.loadbalancer.server.port=8446"
+      - "traefik.http.services.platform-api-auth.loadbalancer.server.scheme=https"
+      # 2. Bearer Token 路由（优先级高）
+      - "traefik.http.routers.platform-api-bearer.rule=PathRegexp(`^/api/[0-9]+/platform/.*`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
+      - "traefik.http.routers.platform-api-bearer.priority=20"
+      - "traefik.http.routers.platform-api-bearer.service=platform-api"
+      - "traefik.http.routers.platform-api-bearer.tls=true"
+      - "traefik.http.services.platform-api-bearer.loadbalancer.server.port=8446"
+      - "traefik.http.services.platform-api-bearer.loadbalancer.server.scheme=https"
+      # 3. 普通 API 路由，走 oauth2-proxy（排除 authenticate）
+      - "traefik.http.routers.platform-api.rule=PathRegexp(`^/api/[0-9]+/platform/.*`) && !PathRegexp(`^/api/[0-9]+/platform/authenticate`)"
+      - "traefik.http.routers.platform-api.priority=10"
+      - "traefik.http.routers.platform-api.service=platform-api"
+      - "traefik.http.routers.platform-api.tls=true"
+      - "traefik.http.routers.platform-api.middlewares=oauth2-proxy"
+      - "traefik.http.services.platform-api.loadbalancer.server.port=8446"
+      - "traefik.http.services.platform-api.loadbalancer.server.scheme=https"
+    volumes:
+      - ./conf/certificates:/cmdb/conf/certificates:ro     
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  search-api:
+    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+    environment:
+      PORT: 8447
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
+      OTEL_SERVICE_NAME: search-api
+      NODE_ENV: production
+      TRANSPORTER: nats://nats:4222
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      HOST: ${HOST}
+      WEBSECURE_PORT: ${WEBSECURE_PORT}
+      SERVICEDIR: services
+      SERVICES: search-api
+    depends_on:
+        - postgres
+        - cmdb
+    labels:
+      - "traefik.enable=true"
+      # 1. Bearer Token 路由（优先级高）
+      - "traefik.http.routers.search-api-bearer.rule=PathRegexp(`^/api/[0-9]+/search/.*`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
+      - "traefik.http.routers.search-api-bearer.priority=20"
+      - "traefik.http.routers.search-api-bearer.service=search-api"
+      - "traefik.http.routers.search-api-bearer.tls=true"
+      - "traefik.http.services.search-api-bearer.loadbalancer.server.port=8447"
+      - "traefik.http.services.search-api-bearer.loadbalancer.server.scheme=https"
+      # 2. 普通（无 Bearer）API 路由，走 oauth2-proxy
+      - "traefik.http.routers.search-api.rule=PathRegexp(`^/api/[0-9]+/search/.*`)"
+      - "traefik.http.routers.search-api.priority=10"
+      - "traefik.http.routers.search-api.service=search-api"
+      - "traefik.http.routers.search-api.tls=true"
+      - "traefik.http.routers.search-api.middlewares=oauth2-proxy"
+      - "traefik.http.services.search-api.loadbalancer.server.port=8447"
+      - "traefik.http.services.search-api.loadbalancer.server.scheme=https"
+    volumes:
+      - ./conf/certificates:/cmdb/conf/certificates:ro     
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  cmdb-ui:
+    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+    environment:
+      SERVICES: cmdb-ui
+      PORT: 8000
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      HOST: ${HOST}
+      WEBSECURE_PORT: ${WEBSECURE_PORT}
+      # CSRF Protection Configuration (BFF Pattern - Centralized at UI Server)
+      CSRF_ENABLED: "true"
+      CSRF_ALLOWED_ORIGINS: "https://${HOST}:${WEBSECURE_PORT},https://${HOST}"
+      CSRF_TOKEN_EXPIRY: "3600"
+      CSRF_HEADER_NAME: "X-CSRF-Token"
+      CSRF_TOKEN_SECRET: ${CSRF_TOKEN_SECRET:-change-this-to-a-secure-32-byte-secret-key-for-production}
+      CSRF_LOG_VIOLATIONS: "true"
+
+    depends_on:
+        - cmdb-api
+        - platform-api
+        - search-api
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ui.rule=PathPrefix(`/ui`)"
+      - "traefik.http.services.ui.loadbalancer.server.port=8000"
+      - "traefik.http.routers.ui.tls=true"
+      - "traefik.http.routers.ui.service=ui"
+      - "traefik.http.services.ui.loadbalancer.server.scheme=https"
+      - "traefik.http.routers.ui.middlewares=oauth2-proxy"
+    volumes:
+      - ./conf/certificates:/cmdb/conf/certificates:ro     
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  postgres:
+    image: ghcr.io/hyo-tech/itom/hyo-product-postgres:1.0.0.2
+    restart: on-failure
+    ports:
+      - "5432:5432"
+    environment:
+      # 数据库配置
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      # 性能配置
+      - POSTGRES_MAX_CONNECTIONS=100
+      - POSTGRES_SHARED_BUFFERS=512MB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=768MB
+      - POSTGRES_MAINTENANCE_WORK_MEM=64MB
+      - POSTGRES_WORK_MEM=256MB
+    volumes:
+      - type: bind
+        source: ./conf/postgres/init.sql
+        target: /docker-entrypoint-initdb.d/init.sql
+        read_only: true
+      - type: volume
+        source: postgres_data
+        target: /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  redis:
+    image: redis:7.2-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  pg_exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
+    depends_on:
+        - postgres
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  nats:
+    image: nats:2.12.6
+    command: ["-c", "/config/nats-server.conf"]
+    volumes:
+      - ./conf/nats/nats-server.conf:/config/nats-server.conf:ro
+      - nats_data:/data
+    ports:
+      - "4222:4222"
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  nats_exporter:
+    image: natsio/prometheus-nats-exporter:0.16.0
+    command:
+      - '-varz'
+      - http://nats:8222
+    depends_on:
+      - nats
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  traefik:
+    image: traefik:3.6.7
+    restart: unless-stopped
+    environment:
+      - OTEL_PROPAGATORS=tracecontext,jaeger,x-request-id
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.http.address=:80
+      - --entryPoints.websecure.address=:443
+      - --serversTransport.insecureSkipVerify=true
+      - "--providers.file.directory=/etc/traefik/config"
+      - "--providers.file.watch=true"
+      - "--tracing.otlp.http=true"
+      - "--tracing.otlp.http.endpoint=http://jaeger:4318/v1/traces"
+    ports:
+      - "3100:80"
+      - "4443:443"
+      - "3080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./conf/certificates:/certificates:ro
+      - ./conf/traefik/config:/etc/traefik/config:ro
+      - traefik_data:/etc/traefik
+    networks:
+      - internal
+      - default
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  jaeger:
+    image: jaegertracing/jaeger:2.6.0
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+    volumes:
+      - jaeger_data:/var/lib/jaeger
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  prometheus:
+    image: prom/prometheus:v3.11.0
+    volumes:
+      - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  grafana:
+    image: grafana/grafana:12.4.2
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./conf/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./conf/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./conf/grafana/dashboards:/var/lib/grafana/dashboards
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  keycloak:
+    image: ghcr.io/hyo-tech/itom/keycloak:1.0.0.251
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "-c", "/scripts/setup-realm-config.sh && /opt/keycloak/bin/kc.sh start --import-realm"] 
+    environment:
+      # Keycloak 基础配置
+      - KC_LOG_LEVEL=INFO
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET=${KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET}
+      - KC_HTTPS_CERTIFICATE_FILE=/certificates/dev.crt
+      - KC_HTTPS_CERTIFICATE_KEY_FILE=/certificates/dev.key
+      - KC_PROXY=edge
+      - KC_PROXY_ADDRESS_FORWARDING=true
+      - KC_HTTP_RELATIVE_PATH=/idm
+      - KC_HOSTNAME_STRICT=false
+      - KC_HOSTNAME_STRICT_HTTPS=false
+      - KC_HTTPS_CERTIFICATE_KEYSTORE_FILE=/certificates/dev.jks
+      - KC_HTTPS_CERTIFICATE_KEYSTORE_PASSWORD=changeit
+      - KC_PROXY_HEADERS=xforwarded
+      - KC_HOSTNAME_REQUEST=always
+      - KC_IMPORT=/opt/keycloak/data/import/*.json
+      - KC_METRICS_ENABLED=true
+      - KC_TRACING_ENABLED=true
+      - KC_TRACING_ENDPOINT=http://jaeger:4317
+
+      # Keycloak 应用配置
+      - ALLOWED_HOSTS=${HOST}
+      - KEYCLOAK_URL=https://${HOST}:${WEBSECURE_PORT}/idm
+      - KC_HOSTNAME_URL=https://${HOST}:${WEBSECURE_PORT}/idm
+      - KC_HOSTNAME_PORT=${WEBSECURE_PORT}
+      - KC_SPI_THEME_FOLDER_DIR=/opt/keycloak/themes
+      - KC_SPI_THEME_STATIC_MAX_AGE=-1
+      - KC_SPI_THEME_CACHE_THEMES=false
+      - KC_SPI_THEME_CACHE_TEMPLATES=false
+    volumes:
+      - ./conf/certificates:/certificates
+      - ./conf/keycloak/scripts:/scripts:ro
+      - ./conf/keycloak/clients/cmdb.template:/templates/cmdb.template:ro
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.keycloak.entrypoints=websecure"
+      - "traefik.http.routers.keycloak.rule=PathPrefix(`/idm`)"
+      - "traefik.http.routers.keycloak.tls=true"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8443"
+      - "traefik.http.services.keycloak.loadbalancer.server.scheme=https"
+      - "traefik.http.services.keycloak.loadbalancer.passhostheader=true"
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  # Service to assign Keycloak service account roles
+  # Runs once after Keycloak starts, then exits
+  role-assigner:
+    image: curlimages/curl:8.11.0
+    command: ["sh", "/scripts/assign-service-account-roles.sh"]
+    volumes:
+      - ./conf/keycloak/scripts:/scripts:ro
+    environment:
+      - KEYCLOAK_URL=https://keycloak:8443/idm
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - REALM_NAME=100000001
+      - SERVICE_ACCOUNT_CLIENT_ID=cmdb_backend
+      - ONCE_ONLY=true
+    depends_on:
+      keycloak:
+        condition: service_started
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  oauth2-proxy:
+    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.1
+    restart: unless-stopped
+    environment:
+      - OAUTH2_PROXY_PROVIDER=keycloak-oidc
+      - OAUTH2_PROXY_SCOPE=openid profile email offline_access
+      - OAUTH2_PROXY_SESSION_STORE_TYPE=redis
+      - OAUTH2_PROXY_REDIS_CONNECTION_URL=redis://redis:6379
+      - OAUTH2_PROXY_REDIS_USE_SENTINEL=false
+      - OAUTH2_PROXY_REDIS_USE_CLUSTER=false
+      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy
+      - OAUTH2_PROXY_COOKIE_SECRET=zYamnQaL0Ica+iXWTBvKVCCW3KYFelC8
+      - OAUTH2_PROXY_COOKIE_SECURE=true
+      - OAUTH2_PROXY_COOKIE_HTTPONLY=true
+      - OAUTH2_PROXY_COOKIE_SAMESITE=lax
+      - OAUTH2_PROXY_COOKIE_REFRESH=4m
+      - OAUTH2_PROXY_COOKIE_EXPIRE=30m
+      - OAUTH2_PROXY_EMAIL_DOMAINS=*
+      - OAUTH2_PROXY_REVERSE_PROXY=true
+      - OAUTH2_PROXY_PASS_ACCESS_TOKEN=true
+      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
+      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4181
+      - OAUTH2_PROXY_PROXY_PREFIX=/auth
+      - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
+      - OAUTH2_PROXY_UPSTREAMS=static://202
+      - OAUTH2_PROXY_SET_AUTHORIZATION_HEADER=true
+      - OAUTH2_PROXY_SSL_INSECURE_SKIP_VERIFY=true
+      - OAUTH2_PROXY_INSECURE_OIDC_ALLOW_UNVERIFIED_EMAIL=true
+      # Whitelist domains for redirect parameter (rd)
+      - OAUTH2_PROXY_WHITELIST_DOMAINS=${HOST}:${WEBSECURE_PORT},${HOST}
+      # Skip auth regex for oauth2 endpoints
+      - OAUTH2_PROXY_SKIP_AUTH_REGEX=^/auth/.*
+      # OAuth2 配置
+      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}
+      - OAUTH2_PROXY_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - OAUTH2_PROXY_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - OAUTH2_PROXY_COOKIE_DOMAIN=${HOST}
+      - OAUTH2_PROXY_REDIRECT_URL=https://${HOST}:${WEBSECURE_PORT}/auth/callback
+      # OIDC explicit endpoints (avoid discovery issues)
+      - OAUTH2_PROXY_SKIP_OIDC_DISCOVERY=true
+      - OAUTH2_PROXY_CODE_CHALLENGE_METHOD=S256
+      - OAUTH2_PROXY_LOGIN_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/auth
+      - OAUTH2_PROXY_REDEEM_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/token
+      - OAUTH2_PROXY_VALIDATE_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/userinfo
+      - OAUTH2_PROXY_OIDC_JWKS_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/certs
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.oauth2-proxy.rule=PathPrefix(`/auth`)"
+      - "traefik.http.routers.oauth2-proxy.entrypoints=websecure"
+      - "traefik.http.routers.oauth2-proxy.tls=true"
+      - "traefik.http.middlewares.oauth2-proxy.forwardauth.address=http://oauth2-proxy:4181/"
+      - "traefik.http.services.oauth2-proxy.loadbalancer.server.port=4181"
+      - "traefik.http.services.oauth2-proxy.loadbalancer.server.scheme=http"
+      - "traefik.http.middlewares.oauth2-proxy.forwardauth.authResponseHeaders=X-Auth-Request-Access-Token,Authorization,Set-Cookie"
+      - "traefik.http.middlewares.oauth2-proxy.forwardauth.addAuthCookiesToResponse=_oauth2_proxy"
+      - "traefik.http.middlewares.oauth2-proxy.forwardauth.trustForwardHeader=true"
+    depends_on:
+      - keycloak
+      - role-assigner
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+networks:
+  internal:
+    name: cmdb_internal
+
+volumes:
+  data:
+  redis_data:
+  prometheus_data:
+  postgres_data:
+  jaeger_data:
+  nats_data:
+  traefik_data:
+  grafana_data:
