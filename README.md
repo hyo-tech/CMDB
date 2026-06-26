@@ -49,7 +49,7 @@ sudo ./scripts/install.sh <host_FQDN>
 ### 🫆 智能识别引擎
 通过可配置匹配逻辑实现唯一性识别，支持多源数据归一化与智能仲裁，自动合并去重，确保CMDB始终为唯一可信基准。
 
-下载详细[产品介绍](https://www.huayung.cn/assets/files/%E5%8D%8E%E6%9D%A8CMDB%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D.pdf)。
+> 下载详细[产品介绍](https://www.huayung.cn/assets/files/%E5%8D%8E%E6%9D%A8CMDB%E4%BA%A7%E5%93%81%E4%BB%8B%E7%BB%8D.pdf)。
 
 ---
 
@@ -62,7 +62,7 @@ sudo ./scripts/install.sh <host_FQDN>
 | 多租户 | ❌ | ✅ |
 | 企业级技术支持 | ❌ | ✅ |
 
-[联系我们](https://www.huayung.cn/index.html#form5-1m)了解如何购买企业版。
+> [联系我们](https://www.huayung.cn/index.html#form5-1m)了解如何购买企业版。
 
 ---
 
@@ -121,7 +121,7 @@ Flexibly configurable by IP ranges; isolated network segments can be discovered 
 ### 🫆 Intelligent Identification Engine
 Ensures unique identification of configuration items through configurable matching and verfication rules. Supports data normalization and arbitration from multiple sources, with automatic deduplication and merging — keeping your CMDB as the single source of truth.
 
-Download the full [Product Brochure](https://www.huayung.cn/en/assets/files/Huayung_CMDB_Intro.pdf).
+> Download the full [Product Brochure](https://www.huayung.cn/en/assets/files/Huayung_CMDB_Intro.pdf).
 
 ---
 
@@ -134,7 +134,7 @@ Download the full [Product Brochure](https://www.huayung.cn/en/assets/files/Huay
 | Multi-Tenancy | ❌ | ✅ |
 | Enterprise-Grade Technical Support | ❌ | ✅ |
 
-[Contact us](https://www.huayung.cn/en/index.html#form5-1m) to learn more about purchasing the Enterprise Edition.
+> [Contact us](https://www.huayung.cn/en/index.html#form5-1m) to learn more about purchasing the Enterprise Edition.
 
 ---
 
