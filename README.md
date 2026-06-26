@@ -4,7 +4,9 @@
 
 **🆓 企业级配置管理数据库，社区版永久免费！**
 
-华杨 CMDB 是华杨智能运维平台的核心模块，可独立部署，用于统一纳管 IT 资产、应用及其依赖关系，帮助团队精准掌控基础设施，提升运维效率。
+华杨 CMDB 是华杨智能运维平台的核心模块，可独立部署，用于统一纳管 IT 资产、应用及其依赖关系。
+
+HYO 由全球领先IT运维管理厂商的核心团队创立，深谙企业级配置管理的最佳实践，帮助不同规模的组织精准掌控基础设施，提升运维效率。
 
 ---
 
@@ -76,7 +78,9 @@ sudo ./scripts/install.sh <host_FQDN>
 
 **🆓 Enterprise-grade configuration management database — Community Edition is permanently free!**
 
-Huayung CMDB is the core module of the Huayung Smart Operations Platform. It can be deployed independently to centrally manage IT assets, applications, and their dependencies, helping teams gain precise visibility into their infrastructure and improve operational efficiency.
+Huayung CMDB is the core module of the Huayung Smart Operations Platform. It can be deployed independently to centrally manage IT assets, applications, and their dependencies. 
+
+HYO was founded by the core team from a globally leading IT operations management vendor, with deep expertise in enterprise-grade configuration management best practices, helping organizations of all sizes gain precise visibility into their infrastructure and improve operational efficiency.
 
 ---
 
