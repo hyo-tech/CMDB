@@ -24,7 +24,7 @@ This agreement is written in both Chinese and English. In the event of any confl
 
 ### 2. 使用限制
 
-您**不得**且不得允许任何第三方：
+您**不得**且不得允许任何第三方（包括但不限于您的关联公司、分支机构、控股或受控实体）从事以下行为：
 
 （1） 将本软件或其任何修改版本进行**转售、出租或进行再许可**，或将其作为收费产品或服务的一部分提供给任何外部主体；  
 （2） 独立**重新分发**本软件的原始安装包、编译后二进制文件或其任何副本；  
@@ -45,7 +45,11 @@ This agreement is written in both Chinese and English. In the event of any confl
 
 ### 6. 协议终止
 
-若被许可人违反本协议任何条款，本许可将**自动终止**，无需另行通知。终止后，被许可人必须立即停止使用本软件，并**销毁其所持有的全部副本及衍生作品**。本协议的第3条、第4条、第5条及第7条在本协议终止后继续有效。
+若被许可人违反本协议任何条款，本许可将**自动终止**，无需另行通知。终止后，被许可人必须立即停止使用本软件，并**销毁其所持有的全部副本及衍生作品**。
+
+本协议的终止不影响许可人就被许可人在协议有效期内已发生的违约行为或其他侵权行为，依据本协议及相关法律追究其责任的权利。
+
+本协议的第3条、第4条、第5条及第7条在本协议终止后继续有效。
 
 ### 7. 法律适用与修订
 
@@ -71,7 +75,7 @@ Subject to your compliance with all terms of this Agreement, the Licensor grants
 
 ### 2. Restrictions on Use
 
-You shall **not**, and shall not permit any third party to:
+You shall **not**, and shall not permit any third party (including but not limited to your affiliates, subsidiaries, holding companies, or controlled entities) to engage in any of the following acts:
 
 (1) **resell, rent, or sublicense** the Software or any modified version thereof, or provide it as part of any paid product or service to any external party;  
 (2) independently **redistribute** the original installation package, compiled binary, or any copy of the Software;  
@@ -92,7 +96,11 @@ In no event shall the Licensor or its affiliates be liable for any direct, indir
 
 ### 6. Termination
 
-If the Licensee breaches any term of this Agreement, this license shall **terminate automatically** without further notice. Upon termination, the Licensee must immediately cease using the Software and **destroy all copies and derivative works** in their possession. Sections 3, 4, 5, and 7 shall survive termination of this Agreement.
+If the Licensee breaches any term of this Agreement, this license shall **terminate automatically** without further notice. Upon termination, the Licensee must immediately cease using the Software and **destroy all copies and derivative works** in their possession. 
+
+Termination of this Agreement shall not affect the Licensor's right to pursue remedies against the Licensee for any breach of this Agreement or other infringing acts that occurred during the effective period of this Agreement, in accordance with the terms of this Agreement and applicable laws and regulations.
+
+Sections 3, 4, 5, and 7 shall survive termination of this Agreement.
 
 ### 7. Governing Law and Amendments
 
