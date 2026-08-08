@@ -5,7 +5,12 @@
 <#import "template.ftl" as layout>
 
 <@layout.registrationLayout displayMessage="true" displayRequiredFields=true>
-    <form id="kc-update-profile-form" class="kc-form" action="${url.loginAction}" method="post">
+    <#-- Preserve locale through form submission (same pattern as login.ftl) -->
+    <#assign formAction = url.loginAction>
+    <#if locale.currentLanguageTag?has_content>
+      <#assign formAction = formAction + (formAction?contains('?')?then('&', '?')) + 'kc_locale=' + locale.currentLanguageTag?url('UTF-8')>
+    </#if>
+    <form id="kc-update-profile-form" class="kc-form" action="${formAction}" method="post">
 
         <#if profile.attributes?has_content>
             <#list profile.attributes as attribute>
@@ -13,6 +18,8 @@
                 <label for="${attribute.name}" class="kc-label <#if attribute.required!false>kc-label-required</#if>">
                     <#if attribute.name == "firstName">
                         ${msg("firstName")}
+                    <#elseif attribute.name == "username">
+                        ${msg("username")}
                     <#elseif attribute.name == "lastName">
                         ${msg("lastName")}
                     <#elseif attribute.name == "email">
@@ -20,7 +27,6 @@
                     <#else>
                         ${attribute.displayName!attribute.name}
                     </#if>
-                    <#if attribute.required!false>*</#if>
                 </label>
                 <input
                     type="<#if attribute.name == "email">email<#else>text</#if>"
@@ -61,8 +67,4 @@
             </button>
         </div>
     </form>
-
-    <div id="kc-copyright">
-        <span class="kc-copyright-text">© ${msg("copyright")}</span>
-    </div>
 </@layout.registrationLayout>

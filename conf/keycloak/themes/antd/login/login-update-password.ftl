@@ -5,12 +5,20 @@
 <#import "template.ftl" as layout>
 
 <@layout.registrationLayout displayMessage=true displayInfo=false>
-    <form id="kc-pass-update-form" class="kc-form" action="${url.loginAction}" method="post">
+    <#-- Preserve the current locale through the form submission so that the
+         success/info page renders in the same language as this page.
+         Keycloak's LocaleUtil.processLocaleParam() reads the "kc_locale"
+         query parameter and stores it as the "locale_user_requested" auth
+         session note — the highest-priority locale source. -->
+    <#assign formAction = url.loginAction>
+    <#if locale.currentLanguageTag?has_content>
+      <#assign formAction = formAction + (formAction?contains('?')?then('&', '?')) + 'kc_locale=' + locale.currentLanguageTag?url('UTF-8')>
+    </#if>
+    <form id="kc-pass-update-form" class="kc-form" action="${formAction}" method="post">
 
         <div class="kc-form-group">
             <label for="password-new" class="kc-label kc-label-required">
                 ${msg("passwordNew")}
-                *
             </label>
             <input
                 type="password"
@@ -26,7 +34,6 @@
         <div class="kc-form-group">
             <label for="password-confirm" class="kc-label kc-label-required">
                 ${msg("passwordConfirm")}
-                *
             </label>
             <input
                 type="password"
@@ -40,21 +47,6 @@
                 ${kcSanitize(messagesPerField.getFirstError('password-new','password-confirm'))?no_esc}
             </span>
             </#if>
-        </div>
-
-        <div class="kc-form-group">
-            <label for="password-current" class="kc-label">
-                ${msg("passwordCurrent")}
-                <#if passwordRequired!false>*</#if>
-            </label>
-            <input
-                type="password"
-                id="password-current"
-                name="password-current"
-                class="kc-input"
-                autocomplete="current-password"
-                <#if passwordRequired!false>required</#if>
-            />
         </div>
 
         <div class="kc-form-buttons">

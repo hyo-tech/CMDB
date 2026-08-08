@@ -1,11 +1,17 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   cmdb:
-    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    logging: *default-logging
+    restart: unless-stopped
     environment:
       PORT: 8443
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
-      OTEL_SERVICE_NAME: cmdb
       NODE_ENV: production
       TRANSPORTER: nats://nats:4222
       REDIS_HOST: redis
@@ -14,46 +20,58 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      SETTING_GLOBAL_ENABLED_MODULES: cmdb
+      FIELD_ENCRYPTION_MASTER_KEY: ${FIELD_ENCRYPTION_MASTER_KEY}
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       HOST: ${HOST}
-      WEBSECURE_PORT: ${WEBSECURE_PORT}      
+      WEBSECURE_PORT: ${WEBSECURE_PORT}
       SERVICEDIR: services
-      SERVICES: query-definition,class-model,tql-engine,datain,multi-tenant,export,dashboard-engine,settings-engine,search-engine
+      SERVICES: query-definition,class-model,tql-engine,normalization-engine,datain,multi-tenant,export,dashboard-engine,settings-engine,search-engine,license-service
+      CONTEXT_PATH: ${CONTEXT_PATH:-}
+      SETTING_GENERAL_TENANT_ENABLED_MODULES: "cmdb,collection-management,api-docs,license-manager"
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET: ${KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KEYCLOAK_SYSADMIN_PASSWORD: ${KEYCLOAK_SYSADMIN_PASSWORD:-Sysadmin_1234}
 
     depends_on:
         - postgres
     labels:
       - "traefik.enable=true"
       # 1. Bearer Token 路由（优先级高）
-      - "traefik.http.routers.cmdb-bearer.rule=PathRegexp(`/cmdb`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
+      - "traefik.http.routers.cmdb-bearer.rule=PathRegexp(`${CONTEXT_PATH:-}/cmdb`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
       - "traefik.http.routers.cmdb-bearer.priority=20"
       - "traefik.http.routers.cmdb-bearer.service=cmdb"
       - "traefik.http.routers.cmdb-bearer.tls=true"
+      - "traefik.http.routers.cmdb-bearer.middlewares=strip-context-path"
       - "traefik.http.services.cmdb-bearer.loadbalancer.server.port=8443"
       - "traefik.http.services.cmdb-bearer.loadbalancer.server.scheme=https"
 
       # 2. 普通（无 Bearer）API 路由，走 oauth2-proxy
-      - "traefik.http.routers.cmdb.rule=PathRegexp(`/cmdb`)"
+      - "traefik.http.routers.cmdb.rule=PathRegexp(`${CONTEXT_PATH:-}/cmdb`)"
       - "traefik.http.routers.cmdb.priority=10"
       - "traefik.http.routers.cmdb.service=cmdb"
       - "traefik.http.routers.cmdb.tls=true"
-      - "traefik.http.routers.cmdb.middlewares=oauth2-proxy"
+      - "traefik.http.routers.cmdb.middlewares=oauth2-proxy,strip-context-path"
       - "traefik.http.services.cmdb.loadbalancer.server.port=8443"
       - "traefik.http.services.cmdb.loadbalancer.server.scheme=https"
     volumes:
-      - ./conf/certificates:/cmdb/conf/certificates:ro  
+      - ./conf/certificates:/cmdb/conf/certificates:ro
+      - ci-export-data:/cmdb/conf/data/cmdb-ci-export
+      - ./logs/cmdb:/cmdb/logs
     networks:
       - internal
     extra_hosts:
       - "${HOST}:host-gateway"
 
-  cmdb-api:
-    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+  # ─── Merged API Gateway (all public-facing API services in one container) ───
+  # Previously separate: cmdb-api, monitoring-api, collection-management-api,
+  #                      platform-api, search-api, ai-agent-api
+  api:
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    logging: *default-logging
+    restart: unless-stopped
     environment:
       PORT: 8443
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
-      OTEL_SERVICE_NAME: cmdb-api
       NODE_ENV: production
       TRANSPORTER: nats://nats:4222
       REDIS_HOST: redis
@@ -62,105 +80,77 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      FIELD_ENCRYPTION_MASTER_KEY: ${FIELD_ENCRYPTION_MASTER_KEY}
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       HOST: ${HOST}
       WEBSECURE_PORT: ${WEBSECURE_PORT}
       SERVICEDIR: services
-      SERVICES: cmdb-api
-
-    depends_on:
-        - postgres
-        - cmdb
-    labels:
-      - "traefik.enable=true"
-      # 1. Bearer Token 路由（优先级高）
-      - "traefik.http.routers.cmdb-api-bearer.rule=PathRegexp(`^/api/[0-9]+/cmdb/.*`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
-      - "traefik.http.routers.cmdb-api-bearer.priority=25"
-      - "traefik.http.routers.cmdb-api-bearer.service=cmdb-api"
-      - "traefik.http.routers.cmdb-api-bearer.tls=true"
-      - "traefik.http.services.cmdb-api-bearer.loadbalancer.server.port=8443"
-      - "traefik.http.services.cmdb-api-bearer.loadbalancer.server.scheme=https"
-
-      # 2. 普通（无 Bearer）API 路由，走 oauth2-proxy
-      - "traefik.http.routers.cmdb-api.rule=PathRegexp(`^/api/[0-9]+/cmdb/.*`)"
-      - "traefik.http.routers.cmdb-api.priority=15"
-      - "traefik.http.routers.cmdb-api.service=cmdb-api"
-      - "traefik.http.routers.cmdb-api.tls=true"
-      - "traefik.http.routers.cmdb-api.middlewares=oauth2-proxy"
-      - "traefik.http.services.cmdb-api.loadbalancer.server.port=8443"
-      - "traefik.http.services.cmdb-api.loadbalancer.server.scheme=https"
-    volumes:
-      - ./conf/certificates:/cmdb/conf/certificates:ro     
-    networks:
-      - internal
-    extra_hosts:
-      - "${HOST}:host-gateway"
-
-  platform-api:
-    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
-    environment:
-      PORT: 8446
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
-      OTEL_SERVICE_NAME: platform-api
-      NODE_ENV: production
-      TRANSPORTER: nats://nats:4222
-      REDIS_HOST: redis
-      POSTGRES_HOST: postgres
-      POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      NODE_TLS_REJECT_UNAUTHORIZED: 0
-      HOST: ${HOST}
-      WEBSECURE_PORT: ${WEBSECURE_PORT}
-      SERVICEDIR: services
-      SERVICES: platform-api
-      KEYCLOAK_URL: https://${HOST}:${WEBSECURE_PORT}/idm
+      SERVICES: api
+      CONTEXT_PATH: ${CONTEXT_PATH:-}
+      SETTING_GENERAL_TENANT_ENABLED_MODULES: "cmdb,collection-management,api-docs,license-manager"
       KEYCLOAK_CLIENT_ID: ${KEYCLOAK_CLIENT_ID}
       KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
       KEYCLOAK_SERVICE_ACCOUNT_CLIENT_ID: ${KEYCLOAK_SERVICE_ACCOUNT_CLIENT_ID}
       KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET: ${KEYCLOAK_SERVICE_ACCOUNT_CLIENT_SECRET}
     depends_on:
-        - postgres
-        - keycloak
-        - role-assigner
+      - postgres
+      - cmdb
+      - ai-agent
+      - keycloak
     labels:
       - "traefik.enable=true"
+      # 共用 strip-prefix 中间件
+      - "traefik.http.middlewares.api-strip-prefix.stripprefix.prefixes=${CONTEXT_PATH:-}"
+
       # 1. 公共认证端点（最高优先级，不走 oauth2-proxy）
-      - "traefik.http.routers.platform-api-auth.rule=PathRegexp(`^/api/[0-9]+/platform/authenticate`)"
-      - "traefik.http.routers.platform-api-auth.priority=30"
-      - "traefik.http.routers.platform-api-auth.service=platform-api"
-      - "traefik.http.routers.platform-api-auth.tls=true"
-      - "traefik.http.services.platform-api-auth.loadbalancer.server.port=8446"
-      - "traefik.http.services.platform-api-auth.loadbalancer.server.scheme=https"
-      # 2. Bearer Token 路由（优先级高）
-      - "traefik.http.routers.platform-api-bearer.rule=PathRegexp(`^/api/[0-9]+/platform/.*`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
-      - "traefik.http.routers.platform-api-bearer.priority=20"
-      - "traefik.http.routers.platform-api-bearer.service=platform-api"
-      - "traefik.http.routers.platform-api-bearer.tls=true"
-      - "traefik.http.services.platform-api-bearer.loadbalancer.server.port=8446"
-      - "traefik.http.services.platform-api-bearer.loadbalancer.server.scheme=https"
-      # 3. 普通 API 路由，走 oauth2-proxy（排除 authenticate）
-      - "traefik.http.routers.platform-api.rule=PathRegexp(`^/api/[0-9]+/platform/.*`) && !PathRegexp(`^/api/[0-9]+/platform/authenticate`)"
-      - "traefik.http.routers.platform-api.priority=10"
-      - "traefik.http.routers.platform-api.service=platform-api"
-      - "traefik.http.routers.platform-api.tls=true"
-      - "traefik.http.routers.platform-api.middlewares=oauth2-proxy"
-      - "traefik.http.services.platform-api.loadbalancer.server.port=8446"
-      - "traefik.http.services.platform-api.loadbalancer.server.scheme=https"
+      - "traefik.http.routers.api-platform-auth.rule=PathRegexp(`^${CONTEXT_PATH:-}/api/[0-9]+/platform/authenticate`)"
+      - "traefik.http.routers.api-platform-auth.priority=30"
+      - "traefik.http.routers.api-platform-auth.service=api"
+      - "traefik.http.routers.api-platform-auth.tls=true"
+      - "traefik.http.routers.api-platform-auth.middlewares=api-strip-prefix"
+
+      # 2. SSE Stream 路由（最高优先级，禁用缓冲）
+      - "traefik.http.routers.api-ai-stream.rule=PathRegexp(`^${CONTEXT_PATH:-}/api/[0-9]+/ai-agent/stream`)"
+      - "traefik.http.routers.api-ai-stream.priority=30"
+      - "traefik.http.routers.api-ai-stream.service=api-stream"
+      - "traefik.http.routers.api-ai-stream.tls=true"
+      - "traefik.http.routers.api-ai-stream.middlewares=api-strip-prefix"
+      - "traefik.http.services.api-stream.loadbalancer.server.port=8443"
+      - "traefik.http.services.api-stream.loadbalancer.server.scheme=https"
+      - "traefik.http.services.api-stream.loadbalancer.responseforwarding.FlushInterval=1ms"
+
+      # 3. Bearer Token 路由（高优先级）
+      - "traefik.http.routers.api-bearer.rule=PathRegexp(`^${CONTEXT_PATH:-}/api/[0-9]+/.*`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
+      - "traefik.http.routers.api-bearer.priority=20"
+      - "traefik.http.routers.api-bearer.service=api"
+      - "traefik.http.routers.api-bearer.tls=true"
+      - "traefik.http.routers.api-bearer.middlewares=api-strip-prefix"
+
+      # 4. 普通 API 路由，走 oauth2-proxy
+      - "traefik.http.routers.api.rule=PathRegexp(`^${CONTEXT_PATH:-}/api/[0-9]+/.*`)"
+      - "traefik.http.routers.api.priority=10"
+      - "traefik.http.routers.api.service=api"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.middlewares=oauth2-proxy,api-strip-prefix"
+
+      # 默认 service 定义
+      - "traefik.http.services.api.loadbalancer.server.port=8443"
+      - "traefik.http.services.api.loadbalancer.server.scheme=https"
     volumes:
-      - ./conf/certificates:/cmdb/conf/certificates:ro     
+      - ./conf/certificates:/cmdb/conf/certificates:ro
+      - ci-export-data:/cmdb/conf/data/cmdb-ci-export
+      - ./logs/api:/cmdb/logs
     networks:
       - internal
     extra_hosts:
       - "${HOST}:host-gateway"
 
-  search-api:
-    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+  ai-agent:
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    logging: *default-logging
+    restart: unless-stopped
     environment:
-      PORT: 8447
-      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://jaeger:4318/v1/traces"
-      OTEL_SERVICE_NAME: search-api
+      PORT: 8449
       NODE_ENV: production
       TRANSPORTER: nats://nats:4222
       REDIS_HOST: redis
@@ -169,46 +159,161 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      FIELD_ENCRYPTION_MASTER_KEY: ${FIELD_ENCRYPTION_MASTER_KEY}
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       HOST: ${HOST}
       WEBSECURE_PORT: ${WEBSECURE_PORT}
       SERVICEDIR: services
-      SERVICES: search-api
+      SERVICES: ai-agent
+      CONTEXT_PATH: ${CONTEXT_PATH:-}
+      SETTING_GENERAL_TENANT_ENABLED_MODULES: "cmdb,collection-management,api-docs,license-manager"
+      # AI Model Configuration
+      ITOM_MODEL_NAME: ${ITOM_MODEL_NAME:-}
+      ITOM_MODEL_BASE_URL: ${ITOM_MODEL_BASE_URL:-}
+      ITOM_MODEL_API_KEY: ${ITOM_MODEL_API_KEY:-${OPENAI_API_KEY:-}}
+      # 辅助任务模型配置（留空则回退到主模型）
+      ITOM_MEMORY_EXTRACT_MODEL: ${ITOM_MEMORY_EXTRACT_MODEL:-}
+      ITOM_MEMORY_EXTRACT_BASE_URL: ${ITOM_MEMORY_EXTRACT_BASE_URL:-}
+      ITOM_MEMORY_EXTRACT_API_KEY: ${ITOM_MEMORY_EXTRACT_API_KEY:-}
+      ITOM_MEMORY_PLANNER_MODEL: ${ITOM_MEMORY_PLANNER_MODEL:-}
+      ITOM_MEMORY_PLANNER_BASE_URL: ${ITOM_MEMORY_PLANNER_BASE_URL:-}
+      ITOM_MEMORY_PLANNER_API_KEY: ${ITOM_MEMORY_PLANNER_API_KEY:-}
+      ITOM_ARTIFACT_ENABLED: ${ITOM_ARTIFACT_ENABLED:-false}
+      ITOM_ARTIFACT_MODEL: ${ITOM_ARTIFACT_MODEL:-}
+      ITOM_ARTIFACT_BASE_URL: ${ITOM_ARTIFACT_BASE_URL:-}
+      ITOM_ARTIFACT_API_KEY: ${ITOM_ARTIFACT_API_KEY:-}
+      ITOM_PII_LLM_ENABLED: ${ITOM_PII_LLM_ENABLED:-true}
+      ITOM_PII_LLM_MODEL: ${ITOM_PII_LLM_MODEL:-}
+      ITOM_PII_LLM_BASE_URL: ${ITOM_PII_LLM_BASE_URL:-}
+      ITOM_PII_LLM_API_KEY: ${ITOM_PII_LLM_API_KEY:-}
     depends_on:
         - postgres
         - cmdb
+    volumes:
+      - ./logs/ai-agent:/cmdb/logs
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  monitoring:
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    logging: *default-logging
+    restart: unless-stopped
+    environment:
+      PORT: 8443
+      NODE_ENV: production
+      TRANSPORTER: nats://nats:4222
+      REDIS_HOST: redis
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      FIELD_ENCRYPTION_MASTER_KEY: ${FIELD_ENCRYPTION_MASTER_KEY}
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      DEFAULT_TENANT_ID: 100000001
+      HOST: ${HOST}
+      WEBSECURE_PORT: ${WEBSECURE_PORT}
+      SERVICEDIR: services
+      SERVICES: monitoring
+      CONTEXT_PATH: ${CONTEXT_PATH:-}
+    depends_on:
+        - postgres
     labels:
       - "traefik.enable=true"
       # 1. Bearer Token 路由（优先级高）
-      - "traefik.http.routers.search-api-bearer.rule=PathRegexp(`^/api/[0-9]+/search/.*`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
-      - "traefik.http.routers.search-api-bearer.priority=20"
-      - "traefik.http.routers.search-api-bearer.service=search-api"
-      - "traefik.http.routers.search-api-bearer.tls=true"
-      - "traefik.http.services.search-api-bearer.loadbalancer.server.port=8447"
-      - "traefik.http.services.search-api-bearer.loadbalancer.server.scheme=https"
-      # 2. 普通（无 Bearer）API 路由，走 oauth2-proxy
-      - "traefik.http.routers.search-api.rule=PathRegexp(`^/api/[0-9]+/search/.*`)"
-      - "traefik.http.routers.search-api.priority=10"
-      - "traefik.http.routers.search-api.service=search-api"
-      - "traefik.http.routers.search-api.tls=true"
-      - "traefik.http.routers.search-api.middlewares=oauth2-proxy"
-      - "traefik.http.services.search-api.loadbalancer.server.port=8447"
-      - "traefik.http.services.search-api.loadbalancer.server.scheme=https"
+      - "traefik.http.middlewares.monitoring-bearer-strip-prefix.stripprefix.prefixes=${CONTEXT_PATH:-}"
+      - "traefik.http.routers.monitoring-bearer.rule=PathPrefix(`${CONTEXT_PATH:-}/monitoring`) && HeaderRegexp(`Authorization`, `^Bearer .+`)"
+      - "traefik.http.routers.monitoring-bearer.priority=20"
+      - "traefik.http.routers.monitoring-bearer.service=monitoring"
+      - "traefik.http.routers.monitoring-bearer.tls=true"
+      - "traefik.http.routers.monitoring-bearer.middlewares=monitoring-bearer-strip-prefix"
+      - "traefik.http.services.monitoring-bearer.loadbalancer.server.port=8443"
+      - "traefik.http.services.monitoring-bearer.loadbalancer.server.scheme=https"
+
+      # 2. 普通（无 Bearer）monitoring 路由，走 oauth2-proxy
+      - "traefik.http.routers.monitoring.rule=PathPrefix(`${CONTEXT_PATH:-}/monitoring`)"
+      - "traefik.http.routers.monitoring.priority=10"
+      - "traefik.http.routers.monitoring.service=monitoring"
+      - "traefik.http.routers.monitoring.tls=true"
+      - "traefik.http.routers.monitoring.middlewares=oauth2-proxy"
+      - "traefik.http.services.monitoring.loadbalancer.server.port=8443"
+      - "traefik.http.services.monitoring.loadbalancer.server.scheme=https"
+
+      # 3. Monitoring WebSocket route (TCP, for proxy connections)
+      - "traefik.tcp.routers.monitoring-ws.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.monitoring-ws.entrypoints=monitoring-ws"
+      - "traefik.tcp.routers.monitoring-ws.service=monitoring-ws"
+      - "traefik.tcp.services.monitoring-ws.loadbalancer.server.port=10052"
     volumes:
-      - ./conf/certificates:/cmdb/conf/certificates:ro     
+      - ./logs/monitoring:/cmdb/logs
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+
+  proxy:
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    logging: *default-logging
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: hyo_proxy
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      FIELD_ENCRYPTION_MASTER_KEY: ${FIELD_ENCRYPTION_MASTER_KEY}
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      HOST: ${HOST}
+      CLIENT_ID: DefaultProxy
+      WEBSECURE_PORT: ${WEBSECURE_PORT}
+      SERVICEDIR: dist
+      SERVICE: proxy
+      MONITORING_SERVER: monitoring:10052
+      WEBDRIVER_URL: ws://browser-agent:3000
+      DEVICE_EXECUTOR_URL: http://device-executor:8190
+    depends_on:
+        - postgres
+        - device-executor
+
+    networks:
+      - internal
+    extra_hosts:
+      - "${HOST}:host-gateway"
+    # Persist + expose the proxy's logs (incl. per-(host,rule) CI-discovery
+    # comm logs under logs/<tenant>/comm/) so they survive container restarts
+    # and are readable from the host. CMDB_ROOT=/cmdb in the image.
+    volumes:
+      - ./logs/proxy:/cmdb/logs
+
+  device-executor:
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/device-executor:2.0.0.290
+    logging: *default-logging
+    restart: unless-stopped
+    environment:
+      - UVICORN_WORKERS=2
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8190/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - internal
     extra_hosts:
       - "${HOST}:host-gateway"
 
   cmdb-ui:
-    image: ghcr.io/hyo-tech/itom/itom:1.0.0.251
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    logging: *default-logging
     environment:
       SERVICES: cmdb-ui
       PORT: 8000
       NODE_TLS_REJECT_UNAUTHORIZED: 0
       HOST: ${HOST}
       WEBSECURE_PORT: ${WEBSECURE_PORT}
+      CONTEXT_PATH: ${CONTEXT_PATH:-}
       # CSRF Protection Configuration (BFF Pattern - Centralized at UI Server)
       CSRF_ENABLED: "true"
       CSRF_ALLOWED_ORIGINS: "https://${HOST}:${WEBSECURE_PORT},https://${HOST}"
@@ -218,26 +323,26 @@ services:
       CSRF_LOG_VIOLATIONS: "true"
 
     depends_on:
-        - cmdb-api
-        - platform-api
-        - search-api
+        - api
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.ui.rule=PathPrefix(`/ui`)"
+      - "traefik.http.routers.ui.rule=PathPrefix(`${CONTEXT_PATH:-}/ui`)"
       - "traefik.http.services.ui.loadbalancer.server.port=8000"
       - "traefik.http.routers.ui.tls=true"
       - "traefik.http.routers.ui.service=ui"
       - "traefik.http.services.ui.loadbalancer.server.scheme=https"
       - "traefik.http.routers.ui.middlewares=oauth2-proxy"
     volumes:
-      - ./conf/certificates:/cmdb/conf/certificates:ro     
+      - ./conf/certificates:/cmdb/conf/certificates:ro
+      - ./logs/cmdb-ui:/cmdb/logs
     networks:
       - internal
     extra_hosts:
       - "${HOST}:host-gateway"
 
   postgres:
-    image: ghcr.io/hyo-tech/itom/hyo-product-postgres:1.0.0.2
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/hyo-product-postgres:2.0.0.8
+    logging: *default-logging
     restart: on-failure
     ports:
       - "5432:5432"
@@ -272,7 +377,8 @@ services:
       - "${HOST}:host-gateway"
 
   redis:
-    image: redis:7.2-alpine
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/vendor/redis:7.2-alpine
+    logging: *default-logging
     ports:
       - "6379:6379"
     restart: unless-stopped
@@ -289,17 +395,9 @@ services:
     extra_hosts:
       - "${HOST}:host-gateway"
 
-  pg_exporter:
-    image: quay.io/prometheuscommunity/postgres-exporter:v0.15.0
-    depends_on:
-        - postgres
-    networks:
-      - internal
-    extra_hosts:
-      - "${HOST}:host-gateway"
-
   nats:
-    image: nats:2.12.6
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/vendor/nats:2.12.6
+    logging: *default-logging
     command: ["-c", "/config/nats-server.conf"]
     volumes:
       - ./conf/nats/nats-server.conf:/config/nats-server.conf:ro
@@ -310,92 +408,56 @@ services:
       - internal
     extra_hosts:
       - "${HOST}:host-gateway"
-
-  nats_exporter:
-    image: natsio/prometheus-nats-exporter:0.16.0
-    command:
-      - '-varz'
-      - http://nats:8222
-    depends_on:
-      - nats
-    networks:
-      - internal
-    extra_hosts:
-      - "${HOST}:host-gateway"
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8222/healthz"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
 
   traefik:
-    image: traefik:3.6.7
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/vendor/traefik:3.6.7
+    logging: *default-logging
     restart: unless-stopped
-    environment:
-      - OTEL_PROPAGATORS=tracecontext,jaeger,x-request-id
     command:
       - --api.insecure=true
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --entryPoints.http.address=:80
       - --entryPoints.websecure.address=:443
+      - --entryPoints.monitoring-ws.address=:10052
       - --serversTransport.insecureSkipVerify=true
       - "--providers.file.directory=/etc/traefik/config"
       - "--providers.file.watch=true"
-      - "--tracing.otlp.http=true"
-      - "--tracing.otlp.http.endpoint=http://jaeger:4318/v1/traces"
+      - --log=true
+      - --log.filePath=/var/log/traefik/traefik.log
+      - --log.format=json
+      - --log.level=DEBUG
+      - --accesslog=true
+      - --accesslog.filePath=/var/log/traefik/access.log
+      - --accesslog.format=json
     ports:
       - "3100:80"
-      - "4443:443"
+      - "${WEBSECURE_PORT}:443"
       - "3080:8080"
+      - "10052:10052"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./conf/certificates:/certificates:ro
       - ./conf/traefik/config:/etc/traefik/config:ro
       - traefik_data:/etc/traefik
+      - ./logs/traefik:/var/log/traefik
     networks:
       - internal
       - default
     extra_hosts:
       - "${HOST}:host-gateway"
 
-  jaeger:
-    image: jaegertracing/jaeger:2.6.0
-    ports:
-      - "16686:16686"
-      - "4318:4318"
-    volumes:
-      - jaeger_data:/var/lib/jaeger
-    networks:
-      - internal
-    extra_hosts:
-      - "${HOST}:host-gateway"
-
-  prometheus:
-    image: prom/prometheus:v3.11.0
-    volumes:
-      - ./conf/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
-    networks:
-      - internal
-    extra_hosts:
-      - "${HOST}:host-gateway"
-
-  grafana:
-    image: grafana/grafana:12.4.2
-    ports:
-      - "3002:3000"
-    volumes:
-      - ./conf/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./conf/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./conf/grafana/dashboards:/var/lib/grafana/dashboards
-      - grafana_data:/var/lib/grafana
-    depends_on:
-      - prometheus
-    networks:
-      - internal
-    extra_hosts:
-      - "${HOST}:host-gateway"
-
   keycloak:
-    image: ghcr.io/hyo-tech/itom/keycloak:1.0.0.251
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/keycloak:2.0.0.290
+    logging: *default-logging
     restart: unless-stopped
-    entrypoint: ["/bin/bash", "-c", "/scripts/setup-realm-config.sh && /opt/keycloak/bin/kc.sh start --import-realm"] 
+    command: ["start"]
     environment:
       # Keycloak 基础配置
       - KC_LOG_LEVEL=INFO
@@ -407,37 +469,41 @@ services:
       - KC_HTTPS_CERTIFICATE_KEY_FILE=/certificates/dev.key
       - KC_PROXY=edge
       - KC_PROXY_ADDRESS_FORWARDING=true
-      - KC_HTTP_RELATIVE_PATH=/idm
+      - KC_HTTP_RELATIVE_PATH=${CONTEXT_PATH:-}/idm
       - KC_HOSTNAME_STRICT=false
       - KC_HOSTNAME_STRICT_HTTPS=false
       - KC_HTTPS_CERTIFICATE_KEYSTORE_FILE=/certificates/dev.jks
       - KC_HTTPS_CERTIFICATE_KEYSTORE_PASSWORD=changeit
       - KC_PROXY_HEADERS=xforwarded
       - KC_HOSTNAME_REQUEST=always
-      - KC_IMPORT=/opt/keycloak/data/import/*.json
       - KC_METRICS_ENABLED=true
-      - KC_TRACING_ENABLED=true
-      - KC_TRACING_ENDPOINT=http://jaeger:4317
+      # Keycloak 数据库配置
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/hyo_keycloak
+      - KC_DB_USERNAME=${POSTGRES_USER}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
 
       # Keycloak 应用配置
       - ALLOWED_HOSTS=${HOST}
-      - KEYCLOAK_URL=https://${HOST}:${WEBSECURE_PORT}/idm
-      - KC_HOSTNAME_URL=https://${HOST}:${WEBSECURE_PORT}/idm
-      - KC_HOSTNAME_PORT=${WEBSECURE_PORT}
+      - KEYCLOAK_URL=https://${HOST}:${WEBSECURE_PORT}${CONTEXT_PATH:-}/idm
+      - KC_HOSTNAME_URL=https://${HOST}:${WEBSECURE_PORT}${CONTEXT_PATH:-}/idm
+      # KC_HOSTNAME_PORT 故意不设置：KC_HOSTNAME_URL 已带端口（:${WEBSECURE_PORT}）并完整钉住
+      # hostname+port。Keycloak 规范化时省略 https 默认端口 443，保留非默认端口（如 4443）——
+      # 与浏览器 origin / jwt.ts issuer（portSuffixFor 同义逻辑）一致 → 避免 invalid redirect_uri。
+      # 端口随 traefik "${WEBSECURE_PORT}:443" 绑定，真正支持任意对外端口。
       - KC_SPI_THEME_FOLDER_DIR=/opt/keycloak/themes
       - KC_SPI_THEME_STATIC_MAX_AGE=-1
       - KC_SPI_THEME_CACHE_THEMES=false
       - KC_SPI_THEME_CACHE_TEMPLATES=false
     volumes:
       - ./conf/certificates:/certificates
-      - ./conf/keycloak/scripts:/scripts:ro
-      - ./conf/keycloak/clients/cmdb.template:/templates/cmdb.template:ro
+      - ./conf/keycloak/themes/antd:/opt/keycloak/themes/antd
     depends_on:
       - postgres
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.keycloak.entrypoints=websecure"
-      - "traefik.http.routers.keycloak.rule=PathPrefix(`/idm`)"
+      - "traefik.http.routers.keycloak.rule=PathPrefix(`${CONTEXT_PATH:-}/idm`)"
       - "traefik.http.routers.keycloak.tls=true"
       - "traefik.http.services.keycloak.loadbalancer.server.port=8443"
       - "traefik.http.services.keycloak.loadbalancer.server.scheme=https"
@@ -447,88 +513,48 @@ services:
     extra_hosts:
       - "${HOST}:host-gateway"
 
-  # Service to assign Keycloak service account roles
-  # Runs once after Keycloak starts, then exits
-  role-assigner:
-    image: curlimages/curl:8.11.0
-    command: ["sh", "/scripts/assign-service-account-roles.sh"]
-    volumes:
-      - ./conf/keycloak/scripts:/scripts:ro
-    environment:
-      - KEYCLOAK_URL=https://keycloak:8443/idm
-      - KEYCLOAK_ADMIN=admin
-      - KEYCLOAK_ADMIN_PASSWORD=admin
-      - REALM_NAME=100000001
-      - SERVICE_ACCOUNT_CLIENT_ID=cmdb_backend
-      - ONCE_ONLY=true
-    depends_on:
-      keycloak:
-        condition: service_started
-    networks:
-      - internal
-    extra_hosts:
-      - "${HOST}:host-gateway"
-
-  oauth2-proxy:
-    image: quay.io/oauth2-proxy/oauth2-proxy:v7.15.1
+  forwardauth:
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/forwardauth:2.0.0.290
+    logging: *default-logging
     restart: unless-stopped
     environment:
-      - OAUTH2_PROXY_PROVIDER=keycloak-oidc
-      - OAUTH2_PROXY_SCOPE=openid profile email offline_access
-      - OAUTH2_PROXY_SESSION_STORE_TYPE=redis
-      - OAUTH2_PROXY_REDIS_CONNECTION_URL=redis://redis:6379
-      - OAUTH2_PROXY_REDIS_USE_SENTINEL=false
-      - OAUTH2_PROXY_REDIS_USE_CLUSTER=false
-      - OAUTH2_PROXY_COOKIE_NAME=_oauth2_proxy
-      - OAUTH2_PROXY_COOKIE_SECRET=zYamnQaL0Ica+iXWTBvKVCCW3KYFelC8
-      - OAUTH2_PROXY_COOKIE_SECURE=true
-      - OAUTH2_PROXY_COOKIE_HTTPONLY=true
-      - OAUTH2_PROXY_COOKIE_SAMESITE=lax
-      - OAUTH2_PROXY_COOKIE_REFRESH=4m
-      - OAUTH2_PROXY_COOKIE_EXPIRE=30m
-      - OAUTH2_PROXY_EMAIL_DOMAINS=*
-      - OAUTH2_PROXY_REVERSE_PROXY=true
-      - OAUTH2_PROXY_PASS_ACCESS_TOKEN=true
-      - OAUTH2_PROXY_SET_XAUTHREQUEST=true
-      - OAUTH2_PROXY_HTTP_ADDRESS=0.0.0.0:4181
-      - OAUTH2_PROXY_PROXY_PREFIX=/auth
-      - OAUTH2_PROXY_SKIP_PROVIDER_BUTTON=true
-      - OAUTH2_PROXY_UPSTREAMS=static://202
-      - OAUTH2_PROXY_SET_AUTHORIZATION_HEADER=true
-      - OAUTH2_PROXY_SSL_INSECURE_SKIP_VERIFY=true
-      - OAUTH2_PROXY_INSECURE_OIDC_ALLOW_UNVERIFIED_EMAIL=true
-      # Whitelist domains for redirect parameter (rd)
-      - OAUTH2_PROXY_WHITELIST_DOMAINS=${HOST}:${WEBSECURE_PORT},${HOST}
-      # Skip auth regex for oauth2 endpoints
-      - OAUTH2_PROXY_SKIP_AUTH_REGEX=^/auth/.*
-      # OAuth2 配置
-      - OAUTH2_PROXY_OIDC_ISSUER_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}
-      - OAUTH2_PROXY_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-      - OAUTH2_PROXY_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
-      - OAUTH2_PROXY_COOKIE_DOMAIN=${HOST}
-      - OAUTH2_PROXY_REDIRECT_URL=https://${HOST}:${WEBSECURE_PORT}/auth/callback
-      # OIDC explicit endpoints (avoid discovery issues)
-      - OAUTH2_PROXY_SKIP_OIDC_DISCOVERY=true
-      - OAUTH2_PROXY_CODE_CHALLENGE_METHOD=S256
-      - OAUTH2_PROXY_LOGIN_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/auth
-      - OAUTH2_PROXY_REDEEM_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/token
-      - OAUTH2_PROXY_VALIDATE_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/userinfo
-      - OAUTH2_PROXY_OIDC_JWKS_URL=https://${HOST}:${WEBSECURE_PORT}/idm/realms/${DEFAULT_TENANT_ID}/protocol/openid-connect/certs
-
+      - PORT=4181
+      - REDIS_URL=redis://redis:6379
+      - COOKIE_SECRET=${FORWARDAUTH_COOKIE_SECRET}
+      - COOKIE_DOMAIN=${HOST}
+      - COOKIE_NAME=_forwardauth
+      - COOKIE_PATH=${CONTEXT_PATH:-/}
+      - COOKIE_SAMESITE=lax
+      - ENCRYPTION_KEY=${FORWARDAUTH_ENCRYPTION_KEY}
+      - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
+      - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
+      - DEFAULT_TENANT_ID=${DEFAULT_TENANT_ID}
+      - HOST=${HOST}
+      - WEBSECURE_PORT=${WEBSECURE_PORT}
+      - CONTEXT_PATH=${CONTEXT_PATH:-}
+      # keycloakExternalUrl 由 forwardauth 代码按 portSuffix() 计算规范 origin（443 省略、4443 等非默认保留），
+      # 不在此用 KEYCLOAK_EXTERNAL_URL 覆盖——否则 :${WEBSECURE_PORT} 在 443 会注入显式 :443，
+      # 绕过代码的默认端口省略，使 OIDC redirect_uri 带 :443 → Keycloak 报 Invalid redirect_uri。
+      - NODE_TLS_REJECT_UNAUTHORIZED=0
+      - SESSION_EXPIRY=1800
+      - SESSION_REFRESH_THRESHOLD=240
+      - OIDC_CACHE_TTL=300
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.oauth2-proxy.rule=PathPrefix(`/auth`)"
-      - "traefik.http.routers.oauth2-proxy.entrypoints=websecure"
-      - "traefik.http.routers.oauth2-proxy.tls=true"
-      - "traefik.http.middlewares.oauth2-proxy.forwardauth.address=http://oauth2-proxy:4181/"
-      - "traefik.http.services.oauth2-proxy.loadbalancer.server.port=4181"
-      - "traefik.http.services.oauth2-proxy.loadbalancer.server.scheme=http"
+      - "traefik.http.routers.forwardauth.rule=PathPrefix(`${CONTEXT_PATH:-}/auth`)"
+      - "traefik.http.routers.forwardauth.entrypoints=websecure"
+      - "traefik.http.routers.forwardauth.tls=true"
+      - "traefik.http.middlewares.strip-context-path.stripprefix.prefixes=${CONTEXT_PATH:-}"
+      - "traefik.http.routers.forwardauth.middlewares=strip-context-path"
+      - "traefik.http.middlewares.oauth2-proxy.forwardauth.address=http://forwardauth:4181/"
+      - "traefik.http.services.forwardauth.loadbalancer.server.port=4181"
+      - "traefik.http.services.forwardauth.loadbalancer.server.scheme=http"
       - "traefik.http.middlewares.oauth2-proxy.forwardauth.authResponseHeaders=X-Auth-Request-Access-Token,Authorization,Set-Cookie"
-      - "traefik.http.middlewares.oauth2-proxy.forwardauth.addAuthCookiesToResponse=_oauth2_proxy"
+      - "traefik.http.middlewares.oauth2-proxy.forwardauth.addAuthCookiesToResponse=_forwardauth,_forwardauth_csrf"
       - "traefik.http.middlewares.oauth2-proxy.forwardauth.trustForwardHeader=true"
     depends_on:
       - keycloak
-      - role-assigner
+      - redis
     networks:
       - internal
     extra_hosts:
@@ -541,9 +567,7 @@ networks:
 volumes:
   data:
   redis_data:
-  prometheus_data:
   postgres_data:
-  jaeger_data:
   nats_data:
   traefik_data:
-  grafana_data:
+  ci-export-data:

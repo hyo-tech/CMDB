@@ -5,7 +5,17 @@
 <#import "template.ftl" as layout>
 
 <@layout.registrationLayout displayMessage="true">
-    <form id="kc-form-login" class="kc-form" action="${url.loginAction}" method="post">
+    <#-- Preserve the current locale through the form submission so that the
+         next step (e.g. required actions, success page) renders in the same
+         language the user selected on the login page.
+         Keycloak's LocaleUtil.processLocaleParam() reads the "kc_locale"
+         query parameter and stores it as the "locale_user_requested" auth
+         session note — the highest-priority locale source. -->
+    <#assign formAction = url.loginAction>
+    <#if locale.currentLanguageTag?has_content>
+      <#assign formAction = formAction + (formAction?contains('?')?then('&', '?')) + 'kc_locale=' + locale.currentLanguageTag?url('UTF-8')>
+    </#if>
+    <form id="kc-form-login" class="kc-form" action="${formAction}" method="post">
       <div class="kc-form-group">
         <label class="kc-label kc-label-login-title">
           ${msg("signInToYourAccount")}

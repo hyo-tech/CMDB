@@ -5,7 +5,12 @@
 <#import "template.ftl" as layout>
 
 <@layout.registrationLayout displayMessage=!messagesPerField.existsError('password','password-confirm') displayInfo=realm.registrationEmailAsPasswordAllowed>
-    <form id="kc-register-form" class="kc-form" action="${url.registrationAction}" method="post">
+    <#-- Preserve locale through form submission (same pattern as login.ftl) -->
+    <#assign formAction = url.registrationAction>
+    <#if locale.currentLanguageTag?has_content>
+      <#assign formAction = formAction + (formAction?contains('?')?then('&', '?')) + 'kc_locale=' + locale.currentLanguageTag?url('UTF-8')>
+    </#if>
+    <form id="kc-register-form" class="kc-form" action="${formAction}" method="post">
 
         <#if profile.attributes?has_content>
             <#list profile.attributes as attribute>
@@ -98,7 +103,4 @@
         </div>
     </form>
 
-    <div id="kc-copyright">
-        <span class="kc-copyright-text">© ${msg("copyright")}</span>
-    </div>
 </@layout.registrationLayout>

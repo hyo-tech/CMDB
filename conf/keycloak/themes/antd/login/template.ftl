@@ -2,13 +2,10 @@
   Base template for Keycloak Ant Design login theme
   This file provides the layout macro used by all login pages
 
-  Supported locales for language selector (must match realm configuration)
+  Language switching uses Keycloak's built-in locale.supported object.
+  Each locale entry has a pre-built .url that correctly preserves the
+  auth session — no custom JavaScript needed for locale switching.
 -->
-<#assign supportedLocales = [
-  {"code": "zh-CN", "labelEn": "Chinese (Simplified) (中文 (简体))", "labelLocal": "中文 (简体) (Chinese (Simplified))"},
-  {"code": "en", "labelEn": "English (英文)", "labelLocal": "English (英文)"}
-]>
-
 <#macro registrationLayout bodyClass="" displayInfo="false" displayMessage="true" displayRequiredFields="false">
 <#-- Capture the main content -->
 <#assign mainContent><#nested></#assign>
@@ -18,7 +15,7 @@
 <#assign infoContent><#nested "info"></#assign>
 </#if>
 <!DOCTYPE html>
-<html class="${properties.kcHtmlClass!} ${bodyClass}" lang="${lang}"<#if realm.internationalizationEnabled!false> dir="${(locale.rtl)?then('rtl','ltr')}"</#if>>
+<html class="${properties.kcHtmlClass!} ${bodyClass}"<#if realm.internationalizationEnabled!false> lang="${locale.currentLanguageTag}" dir="${(locale.rtl)?then('rtl','ltr')}"</#if>>
 <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -46,42 +43,6 @@
         </#list>
     </#if>
     <script src="${url.resourcesPath}/js/login.js" type="text/javascript"></script>
-    <script type="text/javascript">
-      // Read locale from localStorage, default to zh-CN
-      function getStorageLocale() {
-        var stored = localStorage.getItem('hy_sop_language');
-        if (stored === 'zh' || stored === 'zh-CN') return 'zh-CN';
-        if (stored === 'en') return 'en';
-        return 'zh-CN';
-      }
-
-      // Save locale to localStorage keys when user changes language
-      function onLocaleChange(url) {
-        var match = url.match(/kc_locale=([^&]*)/);
-        if (match) {
-          var locale = match[1];
-          var value = locale === 'zh-CN' ? 'zh' : locale;
-          localStorage.setItem('hy_sop_language', value);
-          localStorage.setItem('hy_sop_i18nextLng', value);
-          localStorage.setItem('i18nextLng', value);
-        }
-        window.location.href = url;
-      }
-
-      // Set default locale from localStorage if not already specified
-      (function() {
-        var url = window.location.href;
-        var hasLocaleParam = url.indexOf('kc_locale=') !== -1 || url.indexOf('ui_locales=') !== -1;
-        var hasLocaleCookie = document.cookie.indexOf('KEYCLOAK_LOCALE=') !== -1;
-
-        if (!hasLocaleParam && !hasLocaleCookie) {
-          var locale = getStorageLocale();
-          document.cookie = 'KEYCLOAK_LOCALE=' + locale + '; path=/; max-age=31536000';
-          var separator = url.indexOf('?') !== -1 ? '&' : '?';
-          window.location.href = url + separator + 'kc_locale=' + locale;
-        }
-      })();
-    </script>
 </head>
 
 <body class="${properties.kcBodyClass!}">
@@ -101,15 +62,15 @@
 
     <!-- Right Side: Login Form -->
     <div class="kc-right-panel">
-        <#if realm.internationalizationEnabled!false>
+        <#if realm.internationalizationEnabled!false && locale.supported?size gt 1>
         <div class="kc-language-selector-container">
-            <select id="kc-locale-select" class="kc-language-select" onchange="onLocaleChange(this.value)">
-                <#list supportedLocales as locale>                    
-                    <#assign isSelected = (lang == locale.code)>
-                    <#assign label = (locale.code == "zh-CN" && lang == "zh-CN") || (locale.code != "zh-CN" && lang?starts_with(locale.code?split(" ")[0])) || lang == locale.code>
-                    <option value="${url.loginUrl}&kc_locale=${locale.code}"<#if label> selected</#if>>
-                        ${locale.labelEn}
-                    </option>
+            <#-- Uses Keycloak's built-in locale.supported — each entry has a
+                 pre-built .url that preserves the auth session correctly.
+                 The select simply navigates to that URL. Duplicated labels
+                 (e.g. "中文 (简体) (中文 (简体))") are cleaned up by login.js. -->
+            <select id="kc-locale-select" class="kc-language-select" onchange="window.location.href=this.value">
+                <#list locale.supported as l>
+                <option value="${l.url}"<#if l.label == locale.current> selected</#if>>${l.label}</option>
                 </#list>
             </select>
         </div>

@@ -1,94 +1,148 @@
 /*
  * Ant Design Style Login Page for Keycloak 26
- * Overrides PatternFly styles with Ant Design 5.12.0 styling
+ * Matches Ant Design 5.12.0 component styling
+ *
+ * Sections:
+ *   1. Design Tokens
+ *   2. Reset / Base
+ *   3. Two-Column Layout
+ *   4. Content Area & Copyright
+ *   5. Language Selector
+ *   6. Form Elements
+ *   7. Buttons
+ *   8. Alerts & Messages
+ *   9. Links
+ *  10. Password Toggle
+ *  11. Social Providers
+ *  12. Registration Link
+ *  13. Info Section
+ *  14. OAuth Grant
+ *  15. Miscellaneous
+ *  16. RTL Support
+ *  17. Responsive Design
  */
 
-/* CSS Variables for Ant Design colors */
+/* ============================================
+   1. DESIGN TOKENS
+   ============================================ */
+
 :root {
+  /* Primary */
   --kc-antd-primary: #1677ff;
   --kc-antd-primary-hover: #4096ff;
   --kc-antd-primary-active: #0958d9;
+
+  /* Status */
   --kc-antd-success: #52c41a;
   --kc-antd-warning: #faad14;
   --kc-antd-error: #ff4d4f;
+
+  /* Text */
   --kc-antd-text-primary: rgba(0, 0, 0, 0.88);
   --kc-antd-text-secondary: rgba(0, 0, 0, 0.65);
+  --kc-antd-text-tertiary: rgba(0, 0, 0, 0.45);
+  --kc-antd-text-placeholder: rgba(0, 0, 0, 0.25);
+
+  /* Border & Background */
   --kc-antd-border: #d9d9d9;
+  --kc-antd-bg-white: #ffffff;
   --kc-antd-bg-gray: #fafafa;
+  --kc-antd-bg-page: #f6f6f6;
+  --kc-antd-bg-panel-left: #f6f6f6;
+  --kc-antd-bg-panel-right: #ffffff;
+
+  /* Shape */
   --kc-antd-radius: 6px;
+  --kc-antd-transition: all 0.2s;
+
+  /* Shadow */
   --kc-antd-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03),
                     0 1px 6px -1px rgba(0, 0, 0, 0.02),
                     0 2px 4px 0 rgba(0, 0, 0, 0.02);
   --kc-antd-shadow-lg: 0 6px 16px 0 rgba(0, 0, 0, 0.08),
                        0 3px 6px -4px rgba(0, 0, 0, 0.12),
                        0 9px 28px 8px rgba(0, 0, 0, 0.05);
+
+  /* Sizing */
+  --kc-antd-input-height: 32px;
+  --kc-antd-font-size: 14px;
+  --kc-antd-line-height: 1.5715;
 }
 
 /* ============================================
-   OVERRIDE PATTERNFLY WITH ANT DESIGN STYLES
+   2. RESET / BASE
    ============================================ */
 
-/* Body and Background */
-body#keycloak-bg,
-.login-pf-page,
-body {
-  background: #ffffff !important;
-  margin: 0;
-  min-height: 100vh;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-               'Helvetica Neue', Arial, sans-serif !important;
-}
-
-/* ============================================
-   CUSTOM TEMPLATE STYLES (kc-* classes)
-   ============================================ */
-
-/* Main Container - Two Column Layout */
-#kc-container,
-body #kc-container,
-html body #kc-container {
-  display: flex !important;
-  flex-direction: row !important;
-  min-height: 100vh;
-  width: 100%;
-  background: #ffffff;
-}
-
-/* Left Panel - Branding */
-.kc-left-panel {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  width: 50%;
-  min-height: 100vh;  
-  background: #f4f1f8;
+*,
+*::before,
+*::after {
   box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+               'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--kc-antd-font-size);
+  line-height: var(--kc-antd-line-height);
+  color: var(--kc-antd-text-primary);
+  background: var(--kc-antd-bg-white);
 }
 
 input[type="password"]::-ms-reveal {
   display: none;
 }
 
+/* ============================================
+   3. TWO-COLUMN LAYOUT
+   ============================================ */
+
+#kc-container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background: var(--kc-antd-bg-white);
+}
+
+/* Left Panel — Branding */
+.kc-left-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--kc-antd-bg-panel-left);
+  box-sizing: border-box;
+}
+
 .kc-left-top {
-  position: fixed;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 20vh;
+  padding-top: 8vh;
+  flex-shrink: 0;
+  position: fixed;
 }
 
 .kc-left-bottom {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  flex: 1;  
+  flex: 1;
+  min-height: 0;
+  width: 50vw;
+  height: 100vh;  
 }
 
 .kc-left-bottom img {
-  max-width: 100%;  
   width: 50vw;
-  height: 100vh;
+  height: 100vh;  
 }
 
 .kc-logo {
@@ -97,37 +151,34 @@ input[type="password"]::-ms-reveal {
 
 .kc-logo img {
   height: 20vh;
-  width: auto;
+  width: 14vw;
   display: block;
 }
 
 .kc-product-name {
-  font-size: 24px;
-  font-weight: 600;  
+  font-size: 36px;
+  font-weight: 600;
   margin: 0;
   text-align: center;
 }
 
-/* Right Panel - Login Form */
+/* Right Panel — Login Form */
 .kc-right-panel {
   display: flex;
   flex-direction: column;
   width: 50%;
-  min-height: 100vh;  
+  height: 100%;
   padding: 10px;
-  background: #f1f0f5;
+  overflow-y: auto;
+  background: var(--kc-antd-bg-panel-right);
   box-sizing: border-box;
   position: relative;
 }
 
-/* Language Selector - Top Right */
-.kc-language-selector-container {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 40px;
-}
+/* ============================================
+   4. CONTENT AREA & COPYRIGHT
+   ============================================ */
 
-/* Content Area - Middle */
 #kc-content {
   flex: 1;
   display: flex;
@@ -139,9 +190,17 @@ input[type="password"]::-ms-reveal {
 #kc-content-wrapper {
   width: 100%;
   max-width: 360px;
+  padding: 30px;
 }
 
-/* Copyright - Bottom */
+#kc-page-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--kc-antd-text-primary);
+  margin: 0;
+  text-align: center;
+}
+
 #kc-copyright {
   text-align: center;
   padding-top: 24px;
@@ -149,37 +208,32 @@ input[type="password"]::-ms-reveal {
 }
 
 .kc-copyright-text {
-  font-size: 16px;  
+  font-size: 14px;
+  color: var(--kc-antd-text-tertiary);
 }
 
-/* RTL support for two-column layout */
-.rtl #kc-container {
-  flex-direction: row-reverse !important;
-}
+/* ============================================
+   5. LANGUAGE SELECTOR
+   ============================================ */
 
-.rtl .kc-language-selector-container {
-  justify-content: flex-start;
-}
-
-/* Language Selector Container */
 .kc-language-selector-container {
   display: flex;
-  justify-content: end;  
+  justify-content: flex-end;
+  margin-bottom: 40px;
 }
 
-/* Language Select Dropdown */
 .kc-language-select {
   width: 100%;
   max-width: 300px;
-  height: 32px;
+  height: var(--kc-antd-input-height);
   padding: 4px 11px;
-  font-size: 14px;
-  line-height: 1.5715;
+  font-size: var(--kc-antd-font-size);
+  line-height: var(--kc-antd-line-height);
   color: var(--kc-antd-text-primary);
-  background-color: #ffffff;
+  background-color: var(--kc-antd-bg-white);
   border: 1px solid var(--kc-antd-border);
   border-radius: var(--kc-antd-radius);
-  transition: all 0.2s;
+  transition: var(--kc-antd-transition);
   outline: none;
   cursor: pointer;
 }
@@ -193,72 +247,21 @@ input[type="password"]::-ms-reveal {
   box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
 }
 
-/* RTL support for language selector */
-.rtl .kc-language-selector-container {
-  direction: ltr;
-}
+/* ============================================
+   6. FORM ELEMENTS
+   ============================================ */
 
-/* Login Container */
-.login-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 24px;
-  background: #f0f2f5;
-}
-
-/* Login Header */
-.login-header {
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 16px;
-}
-
-.login-header-wrapper h1 {
-  font-size: 24px;
-  font-weight: 600;
-  color: var(--kc-antd-text-primary);
-  text-align: center;
+form {
   margin: 0;
 }
 
-/* Main Card */
-#kc-container-wrapper {
-  width: 100%;
-  max-width: 400px;
-  background: #ffffff;
-  border-radius: var(--kc-antd-radius);
-  box-shadow: var(--kc-antd-shadow-lg);
-}
-
-#kc-header-wrapper {
-  background: #ffffff;  
-}
-
-#kc-page-title {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--kc-antd-text-primary);
-  margin: 0;
-  text-align: center;
-}
-
-/* Form */
-/* form.kc-form {
-  padding: 24px;
-} */
-
-/* Form Groups */
 .kc-form-group {
   margin-bottom: 20px;
 }
 
-/* Labels */
 .kc-label {
   display: block;
-  font-size: 14px;
+  font-size: var(--kc-antd-font-size);
   color: var(--kc-antd-text-primary);
   margin-bottom: 8px;
   font-weight: 400;
@@ -273,20 +276,21 @@ input[type="password"]::-ms-reveal {
 .kc-label-required::after {
   content: ' *';
   color: var(--kc-antd-error);
+  font-size: var(--kc-antd-font-size);
+  margin-left: 2px;
 }
 
-/* Custom kc-* Input styles */
 .kc-input {
   width: 100%;
-  height: 32px;
+  height: var(--kc-antd-input-height);
   padding: 4px 11px;
-  font-size: 14px;
-  line-height: 1.5715;
+  font-size: var(--kc-antd-font-size);
+  line-height: var(--kc-antd-line-height);
   color: var(--kc-antd-text-primary);
-  background-color: #ffffff;
+  background-color: var(--kc-antd-bg-white);
   border: 1px solid var(--kc-antd-border);
   border-radius: var(--kc-antd-radius);
-  transition: all 0.2s;
+  transition: var(--kc-antd-transition);
   outline: none;
   box-sizing: border-box;
 }
@@ -300,6 +304,23 @@ input[type="password"]::-ms-reveal {
   box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
 }
 
+.kc-input::placeholder {
+  color: var(--kc-antd-text-placeholder);
+}
+
+.kc-input:disabled {
+  background-color: rgba(0, 0, 0, 0.04);
+  cursor: not-allowed;
+}
+
+/* Error message below input */
+.kc-input-error-message {
+  display: block;
+  font-size: 12px;
+  color: var(--kc-antd-error);
+  margin-top: 4px;
+}
+
 /* Checkbox */
 .kc-checkbox-group {
   display: flex;
@@ -310,7 +331,7 @@ input[type="password"]::-ms-reveal {
   display: flex;
   align-items: center;
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--kc-antd-font-size);
   color: var(--kc-antd-text-primary);
   margin: 0;
 }
@@ -323,8 +344,8 @@ input[type="password"]::-ms-reveal {
   border-radius: 2px;
   cursor: pointer;
   appearance: none;
-  background-color: #ffffff;
-  transition: all 0.2s;
+  background-color: var(--kc-antd-bg-white);
+  transition: var(--kc-antd-transition);
   position: relative;
 }
 
@@ -340,12 +361,16 @@ input[type="password"]::-ms-reveal {
   left: 5px;
   width: 4px;
   height: 8px;
-  border: solid #ffffff;
+  border: solid var(--kc-antd-bg-white);
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
 
-/* Form Options */
+.kc-checkbox-box {
+  display: inline-block;
+}
+
+/* Form options row */
 .kc-form-options {
   display: flex;
   justify-content: space-between;
@@ -353,11 +378,92 @@ input[type="password"]::-ms-reveal {
   margin-bottom: 20px;
 }
 
-/* Alert messages in custom template */
+.kc-form-option {
+  font-size: var(--kc-antd-font-size);
+}
+
+/* Form buttons group */
+.kc-form-buttons {
+  margin-top: 24px;
+}
+
+/* ============================================
+   7. BUTTONS
+   ============================================ */
+
+.kc-button {
+  display: inline-block;
+  height: var(--kc-antd-input-height);
+  padding: 4px 15px;
+  margin-right: 10px;
+  font-size: var(--kc-antd-font-size);
+  font-weight: 400;
+  line-height: var(--kc-antd-line-height);
+  border-radius: var(--kc-antd-radius);
+  cursor: pointer;
+  transition: var(--kc-antd-transition);
+  outline: none;
+  text-align: center;
+  text-decoration: none;
+  border: 1px solid var(--kc-antd-border);
+  background-color: var(--kc-antd-bg-white);
+  color: var(--kc-antd-text-primary);
+}
+
+.kc-button:hover {
+  color: var(--kc-antd-primary);
+  border-color: var(--kc-antd-primary);
+}
+
+.kc-button:active {
+  color: var(--kc-antd-primary-active);
+  border-color: var(--kc-antd-primary-active);
+}
+
+.kc-button:focus-visible {
+  outline: 2px solid var(--kc-antd-primary);
+  outline-offset: -2px;
+}
+
+.kc-button-primary {
+  color: var(--kc-antd-bg-white);
+  background-color: var(--kc-antd-primary);
+  border-color: var(--kc-antd-primary);
+}
+
+.kc-button-primary:hover {
+  color: var(--kc-antd-bg-white);
+  background-color: var(--kc-antd-primary-hover);
+  border-color: var(--kc-antd-primary-hover);
+}
+
+.kc-button-primary:active {
+  color: var(--kc-antd-bg-white);
+  background-color: var(--kc-antd-primary-active);
+  border-color: var(--kc-antd-primary-active);
+}
+
+.kc-button-primary:focus-visible {
+  outline: 2px solid var(--kc-antd-primary);
+  outline-offset: -2px;
+}
+
+.kc-button:disabled,
+.kc-button-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* ============================================
+   8. ALERTS & MESSAGES
+   ============================================ */
+
 .alert {
   padding: 12px 16px;
   margin-bottom: 16px;
   border-radius: var(--kc-antd-radius);
+  font-size: var(--kc-antd-font-size);
+  line-height: var(--kc-antd-line-height);
 }
 
 .alert-error {
@@ -366,7 +472,48 @@ input[type="password"]::-ms-reveal {
   color: var(--kc-antd-error);
 }
 
-/* Links */
+.alert-success {
+  background-color: #f6ffed;
+  border: 1px solid #b7eb8f;
+  color: var(--kc-antd-success);
+}
+
+.alert-warning {
+  background-color: #fffbe6;
+  border: 1px solid #ffe58f;
+  color: var(--kc-antd-warning);
+}
+
+.alert-info {
+  background-color: #e6f4ff;
+  border: 1px solid #91caff;
+  color: var(--kc-antd-primary);
+}
+
+.kc-feedback-text {
+  font-size: var(--kc-antd-font-size);
+}
+
+#kc-error-message .instruction {
+  color: var(--kc-antd-error);
+  font-size: var(--kc-antd-font-size);
+}
+
+/* ============================================
+   9. LINKS
+   ============================================ */
+
+a:not(.kc-button):not(.kc-button-primary):not(.kc-social-link) {
+  color: var(--kc-antd-primary);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:not(.kc-button):not(.kc-button-primary):not(.kc-social-link):hover {
+  color: var(--kc-antd-primary-hover);
+  text-decoration: underline;
+}
+
 .kc-link {
   color: var(--kc-antd-primary);
   text-decoration: none;
@@ -378,45 +525,78 @@ input[type="password"]::-ms-reveal {
   text-decoration: underline;
 }
 
-/* Buttons */
-.kc-button {
-  height: 32px;
-  padding: 4px 15px;
-  margin-right: 10px;
-  font-size: 14px;
-  font-weight: 400;
-  border-radius: var(--kc-antd-radius);
+/* ============================================
+   10. PASSWORD TOGGLE
+   ============================================ */
+
+.kc-password-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.kc-password-wrapper input[type="password"],
+.kc-password-wrapper input[type="text"] {
+  padding-right: 38px;
+}
+
+.kc-password-toggle {
+  position: absolute;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+  width: 38px;
+  background: none;
+  border: none;
   cursor: pointer;
-  transition: all 0.2s;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kc-antd-text-tertiary);
+  transition: color 0.2s;
+  z-index: 10;
   outline: none;
-  text-align: center;
-  display: inline-block;
-  text-decoration: none;
-  border: 1px solid transparent;
+  border-radius: 0 var(--kc-antd-radius) var(--kc-antd-radius) 0;
 }
 
-.kc-button-primary {
-  color: #ffffff;
-  background-color: var(--kc-antd-primary);
-  border-color: var(--kc-antd-primary);  
+.kc-password-toggle:hover {
+  color: var(--kc-antd-text-primary);
 }
 
-.kc-button-primary:hover {
-  background-color: var(--kc-antd-primary-hover);
-  border-color: var(--kc-antd-primary-hover);
+.kc-password-toggle:focus-visible {
+  outline: 2px solid var(--kc-antd-primary);
+  outline-offset: -2px;
 }
 
-.kc-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+.kc-password-toggle svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
 }
 
-/* Form buttons */
-.kc-form-buttons {
-  margin-top: 24px;
+/* Default: show eye-off icon */
+.kc-password-toggle .kc-eye-icon {
+  display: none;
 }
 
-/* Social providers */
+/* Toggled: show eye icon */
+.kc-password-toggle.toggled .kc-eye-icon {
+  display: block;
+}
+
+.kc-password-toggle.toggled .kc-eye-off-icon {
+  display: none;
+}
+
+/* ============================================
+   11. SOCIAL PROVIDERS
+   ============================================ */
+
 #kc-social-providers {
   margin-top: 24px;
   padding-top: 24px;
@@ -424,7 +604,7 @@ input[type="password"]::-ms-reveal {
 }
 
 .kc-divider {
-  font-size: 14px;
+  font-size: var(--kc-antd-font-size);
   color: var(--kc-antd-text-secondary);
   text-align: center;
   margin-bottom: 16px;
@@ -462,14 +642,14 @@ input[type="password"]::-ms-reveal {
   display: block;
   width: 100%;
   padding: 8px 16px;
-  font-size: 14px;
+  font-size: var(--kc-antd-font-size);
   color: var(--kc-antd-text-primary);
-  background-color: #ffffff;
+  background-color: var(--kc-antd-bg-white);
   border: 1px solid var(--kc-antd-border);
   border-radius: var(--kc-antd-radius);
   text-align: center;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: var(--kc-antd-transition);
   cursor: pointer;
 }
 
@@ -478,7 +658,10 @@ input[type="password"]::-ms-reveal {
   border-color: var(--kc-antd-primary);
 }
 
-/* Registration */
+/* ============================================
+   12. REGISTRATION LINK
+   ============================================ */
+
 #kc-registration-container {
   margin-top: 24px;
   padding-top: 16px;
@@ -487,11 +670,21 @@ input[type="password"]::-ms-reveal {
 }
 
 .kc-registration-text {
-  font-size: 14px;
+  font-size: var(--kc-antd-font-size);
   color: var(--kc-antd-text-secondary);
 }
 
-/* Info */
+/* ============================================
+   13. INFO SECTION
+   ============================================ */
+
+#kc-info {
+  font-size: var(--kc-antd-font-size);
+  color: var(--kc-antd-text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
 #kc-info-wrapper {
   margin-top: 24px;
   padding: 16px;
@@ -499,426 +692,182 @@ input[type="password"]::-ms-reveal {
   border-radius: var(--kc-antd-radius);
 }
 
-#kc-info {
-  font-size: 14px;
-  color: var(--kc-antd-text-secondary);
-  margin: 0;
+#kc-info-content {
   text-align: center;
 }
 
-/* Reset PatternFly page layout */
-.login-pf-page {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  min-height: 100vh !important;
-  padding: 24px !important;
+.kc-info-message {
+  font-size: var(--kc-antd-font-size);
+  color: var(--kc-antd-text-secondary);
+  line-height: 1.8;
 }
 
-/* Header - Show our custom header */
-#kc-header {
-  display: flex !important;
+/* ============================================
+   14. OAUTH GRANT
+   ============================================ */
+
+.kc-oauth-description p {
+  font-size: var(--kc-antd-font-size);
+  color: var(--kc-antd-text-secondary);
+  margin: 0 0 16px;
+}
+
+.kc-oauth-client-info {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background-color: var(--kc-antd-bg-gray);
+  border-radius: var(--kc-antd-radius);
 }
 
-/* Hide PatternFly page header */
-.login-pf-page-header {
-  display: none !important;
+.kc-client-logo img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
 }
 
-/* Main Card Container - Ant Design Card style */
-.card-pf {
-  background: #ffffff !important;
-  border-radius: var(--kc-antd-radius) !important;
-  box-shadow: var(--kc-antd-shadow-lg) !important;
-  border: none !important;
-  padding: 0 !important;
-  max-width: 360px !important;
-  width: 100% !important;
-  margin: 0 auto !important;
+.kc-client-name {
+  font-size: var(--kc-antd-font-size);
+  font-weight: 500;
+  color: var(--kc-antd-text-primary);
 }
 
-/* Card Header - PatternFly v4 */
-.login-pf-header {
-  padding: 32px 24px 16px !important;
-  background: transparent !important;
-  border: none !important;
+.kc-permissions-list {
+  margin-bottom: 20px;
 }
 
-#kc-page-title {
-  font-size: 20px !important;
-  font-weight: 600 !important;
-  color: var(--kc-antd-text-primary) !important;
-  margin: 0 !important;
-  text-align: center !important;
+.kc-permissions {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
 }
 
-/* Card Content */
-#kc-content {
+.kc-permissions li {
+  padding: 8px 12px;
+  font-size: var(--kc-antd-font-size);
+  color: var(--kc-antd-text-secondary);
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.kc-permissions li:last-child {
+  border-bottom: none;
+}
+
+/* ============================================
+   15. MISCELLANEOUS
+   ============================================ */
+
+.kc-logout-message {
+  font-size: var(--kc-antd-font-size);
+  color: var(--kc-antd-text-secondary);
+  margin: 8px 0 0;
+}
+
+.kc-recaptcha-container {
   display: flex;
   justify-content: center;
-  align-items: center;  
+  margin-top: 8px;
 }
 
-#kc-content-wrapper {
-  background: white;
-  max-width: 400px;
-  padding: 30px;
-  width: 100%;
-}
-
-/* ============================================
-   FORM STYLES - ANT DESIGN INPUT
-   ============================================ */
-
-/* Form Container */
-#kc-form,
-form {
-  margin: 0 !important;
-}
-
-/* Form Groups - PatternFly v4 */
-.login-pf-page .form-group {
-  margin-bottom: 20px !important;
-}
-
-/* Labels (PatternFly v4) - Higher specificity */
-.login-pf-page .pf-c-form__label,
-.login-pf-page label {
-  display: block !important;
-  font-size: 14px !important;
-  color: var(--kc-antd-text-primary) !important;
-  margin-bottom: 8px !important;
-  font-weight: 400 !important;
-}
-
-/* Text Inputs - Ant Design Input style (PatternFly v4) - Higher specificity */
-.login-pf-page input[type="text"],
-.login-pf-page input[type="password"],
-.login-pf-page input[type="email"],
-.login-pf-page .pf-c-form-control,
-.login-pf-page .pf-c-input-group .pf-c-form-control {
-  width: 100% !important;
-  height: 32px !important;
-  padding: 4px 11px !important;
-  font-size: 14px !important;
-  line-height: 1.5715 !important;
-  color: var(--kc-antd-text-primary) !important;
-  background-color: #ffffff !important;
-  border: 1px solid var(--kc-antd-border) !important;
-  border-radius: var(--kc-antd-radius) !important;
-  transition: all 0.2s !important;
-  outline: none !important;
-  box-sizing: border-box !important;
-}
-
-/* More specific selector for input groups */
-.login-pf-page .pf-c-input-group {
-  width: 100% !important;
-}
-
-input[type="text"]:hover,
-input[type="password"]:hover,
-input[type="email"]:hover,
-.pf-v5-c-form-control:hover,
-input[id="username"]:hover,
-input[id="password"]:hover {
-  border-color: var(--kc-antd-primary-hover) !important;
-}
-
-input[type="text"]:focus,
-input[type="password"]:focus,
-input[type="email"]:focus,
-.pf-v5-c-form-control:focus,
-input[id="username"]:focus,
-input[id="password"]:focus {
-  border-color: var(--kc-antd-primary) !important;
-  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1) !important;
-  outline: none !important;
-}
-
-input::placeholder {
-  color: rgba(0, 0, 0, 0.25) !important;
-}
-
-input:disabled {
-  background-color: rgba(0, 0, 0, 0.04) !important;
-  cursor: not-allowed !important;
+.instruction {
+  font-size: var(--kc-antd-font-size);
+  color: var(--kc-antd-text-secondary);
+  line-height: 1.8;
 }
 
 /* ============================================
-   BUTTONS - ANT DESIGN BUTTON
+   16. RTL SUPPORT
    ============================================ */
 
-/* Primary Button (PatternFly v4) - Higher specificity */
-.login-pf-page input[type="submit"],
-.login-pf-page .pf-c-button.pf-m-primary,
-.login-pf-page .pf-c-button.pf-m-primary.pf-m-block,
-.login-pf-page #kc-login {
-  height: 32px !important;
-  padding: 4px 15px !important;
-  font-size: 14px !important;
-  font-weight: 400 !important;
-  line-height: 1.5715 !important;
-  color: #ffffff !important;
-  background-color: var(--kc-antd-primary) !important;
-  border: 1px solid var(--kc-antd-primary) !important;
-  border-radius: var(--kc-antd-radius) !important;
-  cursor: pointer !important;
-  transition: all 0.2s !important;
-  outline: none !important;
-  width: 100% !important;
-  text-align: center !important;
-  box-shadow: none !important;
+[dir="rtl"] #kc-container,
+.rtl #kc-container {
+  flex-direction: row-reverse;
 }
 
-/* Button hover - PatternFly v4 */
-.login-pf-page .pf-c-button.pf-m-primary:hover,
-.login-pf-page input[type="submit"]:hover,
-.login-pf-page #kc-login:hover {
-  background-color: var(--kc-antd-primary-hover) !important;
-  border-color: var(--kc-antd-primary-hover) !important;
+[dir="rtl"] .kc-language-selector-container,
+.rtl .kc-language-selector-container {
+  justify-content: flex-start;
+  direction: ltr;
 }
 
-button[type="submit"]:hover,
-input[type="submit"]:hover,
-.pf-v5-c-button.pf-m-primary:hover,
-.pf-v5-c-button.pf-v5-m-primary:hover,
-button[id="kc-login"]:hover {
-  background-color: var(--kc-antd-primary-hover) !important;
-  border-color: var(--kc-antd-primary-hover) !important;
+[dir="rtl"] .kc-password-wrapper input[type="password"],
+[dir="rtl"] .kc-password-wrapper input[type="text"],
+.rtl .kc-password-wrapper input[type="password"],
+.rtl .kc-password-wrapper input[type="text"] {
+  padding-right: 11px;
+  padding-left: 38px;
 }
 
-button[type="submit"]:active,
-input[type="submit"]:active,
-.pf-v5-c-button.pf-m-primary:active,
-button[id="kc-login"]:active {
-  background-color: var(--kc-antd-primary-active) !important;
-  border-color: var(--kc-antd-primary-active) !important;
+[dir="rtl"] .kc-password-toggle,
+.rtl .kc-password-toggle {
+  right: auto;
+  left: 1px;
+  border-radius: var(--kc-antd-radius) 0 0 var(--kc-antd-radius);
 }
 
-button:disabled,
-button[type="submit"]:disabled {
-  cursor: not-allowed !important;
-  opacity: 0.6 !important;
-}
-
-/* Form submit button group - ensure full width */
-#kc-form-buttons,
-.pf-v5-c-form__actions {
-  margin-top: 24px !important;
-  width: 100% !important;
+[dir="rtl"] .kc-form-options,
+.rtl .kc-form-options {
+  flex-direction: row-reverse;
 }
 
 /* ============================================
-   CHECKBOX - ANT DESIGN CHECKBOX
+   17. RESPONSIVE DESIGN
    ============================================ */
 
-.pf-v5-c-check,
-input[type="checkbox"] {
-  width: 16px !important;
-  height: 16px !important;
-  border: 1px solid var(--kc-antd-border) !important;
-  border-radius: 2px !important;
-  cursor: pointer !important;
+@media (max-width: 768px) {
+  #kc-container {
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+  }
+
+  .kc-left-panel {
+    width: 100%;
+    height: auto;
+    padding: 40px 24px 24px;
+  }
+
+  .kc-left-top {
+    position: static;
+    padding-top: 0;
+  }
+
+  .kc-logo img {
+    height: 12vh;
+  }
+
+  .kc-left-bottom {
+    display: none;
+  }
+
+  .kc-right-panel {
+    width: 100%;
+    height: auto;
+    padding: 24px;
+  }
 }
-
-/* ============================================
-   ALERTS AND ERROR MESSAGES
-   ============================================ */
-
-#kc-error-message,
-.alert,
-.alert-danger,
-.pf-v5-c-alert {
-  background-color: #fff2f0 !important;
-  border: 1px solid #ffccc7 !important;
-  border-radius: var(--kc-antd-radius) !important;
-  padding: 12px 16px !important;
-  margin-bottom: 16px !important;
-}
-
-#kc-error-message p,
-.alert p,
-.pf-v5-c-alert__title {
-  color: var(--kc-antd-error) !important;
-  font-size: 14px !important;
-  margin: 0 !important;
-}
-
-.instruction,
-.pf-v5-c-alert__description {
-  color: var(--kc-antd-error) !important;
-  font-size: 14px !important;
-}
-
-/* ============================================
-   LINKS
-   ============================================ */
-
-a,
-.kc-link,
-.pf-v5-c-button.pf-m-link {
-  color: var(--kc-antd-primary) !important;
-  text-decoration: none !important;
-  transition: color 0.2s !important;
-}
-
-a:hover,
-.kc-link:hover,
-.pf-v5-c-button.pf-m-link:hover {
-  color: var(--kc-antd-primary-hover) !important;
-  text-decoration: underline !important;
-}
-
-/* ============================================
-   RESPONSIVE DESIGN
-   ============================================ */
 
 @media (max-width: 480px) {
-  .login-pf-page {
-    padding: 16px !important;
+  #kc-content-wrapper {
+    max-width: 100%;
+    padding: 20px 0;
   }
 
-  .card-pf,
-  .pf-v5-c-login__main {
-    max-width: 100% !important;
+  .kc-left-panel {
+    padding: 32px 16px 16px;
   }
 
-  .login-pf-header,
-  .pf-v5-c-login__main-header {
-    padding: 20px 16px 12px !important;
+  .kc-right-panel {
+    padding: 16px;
   }
 
-  #kc-page-title,
-  .pf-v5-c-title {
-    font-size: 18px !important;
+  .kc-product-name {
+    font-size: 20px;
   }
 
-  .pf-v5-c-login__main-body {
-    padding: 0 16px 20px !important;
+  #kc-page-title {
+    font-size: 18px;
   }
-}
-
-/* ============================================
-   UTILITY OVERRIDES
-   ============================================ */
-
-/* Remove PatternFly specific styles */
-.pf-v5-c-login {
-  background: transparent !important;
-}
-
-.pf-v5-c-login__container {
-  background: transparent !important;
-  padding: 0 !important;
-}
-
-/* Remove borders and shadows from PatternFly */
-.pf-v5-c-card,
-.card-pf {
-  box-shadow: var(--kc-antd-shadow-lg) !important;
-}
-
-/* Input group overrides */
-.pf-v5-c-input-group,
-.pf-v5-c-text-input-group {
-  width: 100% !important;
-}
-
-.pf-v5-c-input-group .pf-v5-c-input-group__item,
-.pf-v5-c-text-input-group__main {
-  flex: 1 !important;
-}
-
-.pf-v5-c-text-input-group__text input {
-  border: none !important;
-  box-shadow: none !important;
-}
-/* ============================================
-   PASSWORD SHOW/HIDE TOGGLE (Ant Design style)
-   ============================================ */
-
-/* Password input wrapper - make it the positioning context */
-.kc-password-wrapper {
-  position: relative !important;
-  display: block !important;
-  width: 100% !important;
-}
-
-/* Password input with padding for icon - ONLY within password wrapper */
-.kc-password-wrapper input[type="password"],
-.kc-password-wrapper .kc-input {
-  padding-right: 38px !important;
-}
-
-/* Password toggle button - positioned absolutely within wrapper */
-.kc-password-toggle {
-  position: absolute !important;
-  right: 1px !important;
-  top: 1px !important;
-  bottom: 1px !important;
-  width: 38px !important;
-  background: none !important;
-  border: none !important;
-  cursor: pointer !important;
-  padding: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  color: rgba(0, 0, 0, 0.45) !important;
-  transition: color 0.2s !important;
-  z-index: 10 !important;
-  outline: none !important;
-  border-radius: 0 var(--kc-antd-radius) var(--kc-antd-radius) 0 !important;
-}
-
-.kc-password-toggle:hover {
-  color: rgba(0, 0, 0, 0.88) !important;
-}
-
-.kc-password-toggle:focus-visible {
-  outline: 2px solid var(--kc-antd-primary) !important;
-  outline-offset: -2px !important;
-}
-
-/* SVG icons within toggle button */
-.kc-password-toggle svg {
-  display: block !important;
-  width: 16px !important;
-  height: 16px !important;
-  flex-shrink: 0 !important;
-  fill: none !important;
-  stroke: currentColor !important;
-  stroke-width: 1.5 !important;
-}
-
-/* Icon display logic for password toggle */
-/* Default state (password hidden): show eye-off icon */
-.kc-password-toggle .kc-eye-icon {
-  display: none !important;
-}
-
-/* Toggled state (password visible): show eye icon */
-.kc-password-toggle.toggled .kc-eye-icon {
-  display: block !important;
-}
-
-.kc-password-toggle.toggled .kc-eye-off-icon {
-  display: none !important;
-}
-
-/* RTL support */
-.rtl .kc-password-wrapper input[type="password"],
-.rtl .kc-password-wrapper .kc-input {
-  padding-right: 11px !important;
-  padding-left: 38px !important;
-}
-
-.rtl .kc-password-toggle {
-  right: auto !important;
-  left: 1px !important;
-  border-radius: var(--kc-antd-radius) 0 0 var(--kc-antd-radius) !important;
 }

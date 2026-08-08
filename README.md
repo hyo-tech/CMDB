@@ -25,9 +25,9 @@ cd CMDB
 sudo ./scripts/install.sh <host_FQDN>
 ```
 
-服务启动后，访问 `https://<host_FQDN>:4443/ui/100000001` (默认用户名密码 admin/admin), 即可开始使用。
+服务启动后，访问 `https://<host_FQDN>/itom/ui/100000001` (默认用户名密码 admin/Admin_1234), 即可开始使用。
 
-> 详细配置说明请参考 [社区版部署指南](https://www.huayung.cn/docs/1.x/installation/installation-demo)。
+> 详细配置说明请参考 [社区版部署指南](https://www.huayung.cn/docs/2.x/installation/installation-community)。
 
 ---
 
@@ -99,9 +99,9 @@ cd CMDB
 sudo ./scripts/install.sh <host_FQDN>
 ```
 
-Once the service is running, access it at `https://<host_FQDN>:4443/ui/100000001` to get started.
+Once the service is running, access it at `https://<host_FQDN>/itom/ui/100000001` to get started. (Default username/password: admin/Admin_1234)
 
-> For detailed configuration, refer to the [Community Edition Deployment Guide](https://www.huayung.cn/docs/en/1.x/installation/installation-demo).
+> For detailed configuration, refer to the [Community Edition Deployment Guide](https://www.huayung.cn/docs/en/2.x/installation/installation-community).
 
 ---
 

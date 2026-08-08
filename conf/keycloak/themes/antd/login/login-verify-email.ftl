@@ -29,7 +29,4 @@
         </div>
     </div>
 
-    <div id="kc-copyright">
-        <span class="kc-copyright-text">© ${msg("copyright")}</span>
-    </div>
 </@layout.registrationLayout>
