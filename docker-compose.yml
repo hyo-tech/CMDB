@@ -7,7 +7,7 @@ x-logging: &default-logging
 services:
 
   cmdb:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.296
     logging: *default-logging
     restart: unless-stopped
     environment:
@@ -67,7 +67,7 @@ services:
   # Previously separate: cmdb-api, monitoring-api, collection-management-api,
   #                      platform-api, search-api, ai-agent-api
   api:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.296
     logging: *default-logging
     restart: unless-stopped
     environment:
@@ -146,7 +146,7 @@ services:
       - "${HOST}:host-gateway"
 
   ai-agent:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.296
     logging: *default-logging
     restart: unless-stopped
     environment:
@@ -197,7 +197,7 @@ services:
       - "${HOST}:host-gateway"
 
   monitoring:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.296
     logging: *default-logging
     restart: unless-stopped
     environment:
@@ -254,7 +254,7 @@ services:
       - "${HOST}:host-gateway"
 
   proxy:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.296
     logging: *default-logging
     environment:
       NODE_ENV: production
@@ -288,7 +288,7 @@ services:
       - ./logs/proxy:/cmdb/logs
 
   device-executor:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/device-executor:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/device-executor:2.0.0.296
     logging: *default-logging
     restart: unless-stopped
     environment:
@@ -305,7 +305,7 @@ services:
       - "${HOST}:host-gateway"
 
   cmdb-ui:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/itom:2.0.0.296
     logging: *default-logging
     environment:
       SERVICES: cmdb-ui
@@ -454,7 +454,7 @@ services:
       - "${HOST}:host-gateway"
 
   keycloak:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/keycloak:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/keycloak:2.0.0.296
     logging: *default-logging
     restart: unless-stopped
     command: ["start"]
@@ -514,7 +514,7 @@ services:
       - "${HOST}:host-gateway"
 
   forwardauth:
-    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/forwardauth:2.0.0.290
+    image: swr.cn-east-3.myhuaweicloud.com/hyo-tech/itom/forwardauth:2.0.0.296
     logging: *default-logging
     restart: unless-stopped
     environment:
